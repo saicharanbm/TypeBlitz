@@ -8,6 +8,14 @@ export default {
         textPrimary: "var(--textPrimary)",
         textSecondary: "var(--textSecondary)",
         primaryColor: "var(--primaryColor)",
+        correct: "var(--correct)",
+        incorrect: "var(--incorrect)",
+      },
+      fontFamily: {
+        robotoMono: ["Roboto Mono", "monospace"], // Custom font
+      },
+      userSelect: {
+        none: "none",
       },
     },
   },

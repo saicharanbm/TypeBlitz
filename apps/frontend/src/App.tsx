@@ -1,224 +1,8 @@
 import { Play } from "lucide-react";
-import { useRef, useState, useCallback } from "react";
-interface GameState {
-  words: string[];
-  currentWordIndex: number;
-  currentLetterIndex: number;
-  gameStatus: "waiting" | "playing" | "finished";
-  timeLeft: number;
-  wpm: number;
-}
+import { useRef, useState, useCallback, useEffect } from "react";
+import { words } from "./utils/data";
+import { GameState } from "./types";
 
-const words = [
-  "the",
-  "be",
-  "of",
-  "and",
-  "a",
-  "to",
-  "in",
-  "he",
-  "have",
-  "it",
-  "that",
-  "for",
-  "they",
-  "I",
-  "with",
-  "as",
-  "not",
-  "on",
-  "she",
-  "at",
-  "by",
-  "this",
-  "we",
-  "you",
-  "do",
-  "but",
-  "from",
-  "or",
-  "which",
-  "one",
-  "would",
-  "all",
-  "will",
-  "there",
-  "say",
-  "who",
-  "make",
-  "when",
-  "can",
-  "more",
-  "if",
-  "no",
-  "man",
-  "out",
-  "other",
-  "so",
-  "what",
-  "time",
-  "up",
-  "go",
-  "about",
-  "than",
-  "into",
-  "could",
-  "state",
-  "only",
-  "new",
-  "year",
-  "some",
-  "take",
-  "come",
-  "these",
-  "know",
-  "see",
-  "use",
-  "get",
-  "like",
-  "then",
-  "first",
-  "any",
-  "work",
-  "now",
-  "may",
-  "such",
-  "give",
-  "over",
-  "think",
-  "most",
-  "even",
-  "find",
-  "day",
-  "also",
-  "after",
-  "way",
-  "many",
-  "must",
-  "look",
-  "before",
-  "great",
-  "back",
-  "through",
-  "long",
-  "where",
-  "much",
-  "should",
-  "well",
-  "people",
-  "down",
-  "own",
-  "just",
-  "because",
-  "good",
-  "each",
-  "those",
-  "feel",
-  "seem",
-  "how",
-  "high",
-  "too",
-  "place",
-  "little",
-  "world",
-  "very",
-  "still",
-  "nation",
-  "hand",
-  "old",
-  "life",
-  "tell",
-  "write",
-  "become",
-  "here",
-  "show",
-  "house",
-  "both",
-  "between",
-  "need",
-  "mean",
-  "call",
-  "develop",
-  "under",
-  "last",
-  "right",
-  "move",
-  "thing",
-  "general",
-  "school",
-  "never",
-  "same",
-  "another",
-  "begin",
-  "while",
-  "number",
-  "part",
-  "turn",
-  "real",
-  "leave",
-  "might",
-  "want",
-  "point",
-  "form",
-  "off",
-  "child",
-  "few",
-  "small",
-  "since",
-  "against",
-  "ask",
-  "late",
-  "home",
-  "interest",
-  "large",
-  "person",
-  "end",
-  "open",
-  "public",
-  "follow",
-  "during",
-  "present",
-  "without",
-  "again",
-  "hold",
-  "govern",
-  "around",
-  "possible",
-  "head",
-  "consider",
-  "word",
-  "program",
-  "problem",
-  "however",
-  "lead",
-  "system",
-  "set",
-  "order",
-  "eye",
-  "plan",
-  "run",
-  "keep",
-  "face",
-  "fact",
-  "group",
-  "play",
-  "stand",
-  "increase",
-  "early",
-  "course",
-  "change",
-  "help",
-  "line",
-];
-
-interface WordElementRef extends HTMLDivElement {
-  children: HTMLCollectionOf<LetterElement>;
-}
-interface LetterElement extends HTMLSpanElement {
-  className: string;
-  textContent: string;
-}
 function App() {
   const GAME_TIME = useRef<number>(30 * 1000);
   const [gameState, setGameState] = useState<GameState>({
@@ -236,7 +20,6 @@ function App() {
     const randomIndex = Math.floor(Math.random() * words.length);
     return words[randomIndex];
   };
-
   const initializeGame = useCallback((): void => {
     const newWords = Array.from({ length: 200 }, () => getRandomWord());
     setGameState((prev) => ({
@@ -244,30 +27,136 @@ function App() {
       words: newWords,
       currentWordIndex: 0,
       currentLetterIndex: 0,
-      gameStatus: "waiting",
+      gameStatus: "playing",
       timeLeft: GAME_TIME.current / 1000,
       wpm: 0,
     }));
   }, []);
+  useEffect(() => {
+    initializeGame();
+  }, [initializeGame]);
 
-  const getCursorPosition = () => {
-    if (!wordsRef.current) return { top: 0, left: 0 };
+  const handleKeyUp = (event: React.KeyboardEvent<HTMLDivElement>): void => {
+    // if the game is finished return
+    if (gameState.gameStatus === "finished") return;
+    const { key } = event;
+    //we need to handel 3 conditions letter, space, backspace
+    const isLetter = key.length === 1 && key !== " ";
+    const isSpace = key === " ";
+    const isBackspace = key === "Backspace";
 
-    const currentWord = wordsRef.current.children[
-      gameState.currentWordIndex
-    ] as WordElementRef | undefined;
-    if (!currentWord) return { top: 0, left: 0 };
+    //if the game is waiting and a letter is pressed, start the game
+    if (gameState.gameStatus === "waiting" && isLetter) {
+      setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
+      // startTimer();
+    }
+    //get the current word html element and current letter html element to verify that the user is typing the correct letter
+    const currentWordDiv =
+      wordsRef.current?.children[gameState.currentWordIndex];
+    if (!currentWordDiv) return;
+    if (isLetter) {
+      const currentLetter =
+        currentWordDiv.children[gameState.currentLetterIndex];
 
-    const currentLetter = currentWord.children[gameState.currentLetterIndex];
-    const rect = currentLetter
-      ? currentLetter.getBoundingClientRect()
-      : currentWord.getBoundingClientRect();
+      if (currentLetter && currentLetter.textContent === key) {
+        console.log("correct letter");
+        // Add the correct class to the letter
+        currentLetter.classList.remove("text-incorrect");
+        currentLetter.classList.add("text-correct");
+      } else {
+        if (
+          gameState.currentLetterIndex >=
+          gameState.words[gameState.currentWordIndex].length
+        ) {
+          // Add the letter with incorrect class to the current wordDiv
+          const incorrectLetter = document.createElement("span");
+          incorrectLetter.className = "letter text-incorrect";
+          incorrectLetter.textContent = key;
+          currentWordDiv.appendChild(incorrectLetter);
+        } else if (currentLetter) {
+          console.log("incorrect letter");
+          currentLetter.classList.remove("text-correct");
+          currentLetter.classList.add("text-incorrect");
+        }
+      }
+    }
+    if (isSpace) {
+      //we need to handle 2 cases 1) space i  the middle of the word and 2) space at the end of the word
+      if (
+        gameState.currentLetterIndex >=
+        gameState.words[gameState.currentWordIndex].length
+      ) {
+        //we need to move to the next word
+        setGameState((prev) => ({
+          ...prev,
+          currentWordIndex: prev.currentWordIndex + 1,
+          currentLetterIndex: 0,
+        }));
+        return;
+      }
+      // get the current letter and add the incorrect class
+      const currentLetter =
+        currentWordDiv.children[gameState.currentLetterIndex];
+      if (currentLetter) {
+        currentLetter.classList.remove("text-correct");
+        currentLetter.classList.add("text-incorrect");
+      }
+      return;
+    }
+    if (isBackspace) {
+      //we need to handle 2 cases 1) backspace i  the middle of the word and 2) backspace at the start of the word
+      console.log(gameState.currentLetterIndex);
+      if (
+        gameState.currentLetterIndex === 0 &&
+        gameState.currentWordIndex === 0
+      )
+        return;
+      if (gameState.currentLetterIndex !== 0) {
+        const currentLetter =
+          currentWordDiv.children[gameState.currentLetterIndex - 1];
 
-    return {
-      top: rect.top + 2,
-      left: currentLetter ? rect.left : rect.right,
-    };
+        if (currentLetter) {
+          //if the currennt index is greater than the length of the word then delete the last letter
+          if (
+            gameState.currentLetterIndex >
+            gameState.words[gameState.currentWordIndex].length
+          ) {
+            console.log("hello");
+            currentWordDiv.removeChild(currentLetter);
+          } else {
+            currentLetter.classList.remove("text-correct");
+            currentLetter.classList.remove("text-incorrect");
+          }
+        }
+        setGameState((prev) => ({
+          ...prev,
+          currentLetterIndex: prev.currentLetterIndex - 1,
+        }));
+        return;
+      }
+
+      // move the pointer to the end of the previous word
+      // end of prevoius word might not be its lenght because of the error text at the end
+      // so het the content of that div
+      const previousWordDiv =
+        wordsRef.current?.children[gameState.currentWordIndex - 1];
+      if (!previousWordDiv) return;
+
+      console.log(previousWordDiv.children.length);
+      setGameState((prev) => ({
+        ...prev,
+        currentWordIndex: prev.currentWordIndex - 1,
+        currentLetterIndex: previousWordDiv.children.length,
+      }));
+      return;
+    }
+
+    setGameState((prev) => ({
+      ...prev,
+      currentLetterIndex: prev.currentLetterIndex + 1,
+    }));
   };
+
   return (
     <div className="max-w-[1400px] min h-screen mx-auto pt-12  px-4 sm:px-6 lg:px-12 ">
       <nav>
@@ -277,8 +166,8 @@ function App() {
         </h1>
       </nav>
 
-      <div className="flex justify-between items-center mb-8">
-        <div className="text-yellow-400 text-xl">
+      <div className="flex justify-between select-none items-center mb-8">
+        <div className="text-yellow-400 text-xl ">
           {gameState.gameStatus === "finished"
             ? `WPM: ${gameState.wpm}`
             : gameState.timeLeft}
@@ -292,14 +181,21 @@ function App() {
       </div>
       <div
         ref={gameRef}
-        className={`relative h-[105px] overflow-hidden leading-9 focus:outline-none ${
-          gameState.gameStatus === "finished" ? "opacity-50" : ""
+        className={`game-area relative h-[108px] overflow-hidden leading-9 focus:outline-none ${
+          gameState.gameStatus === "finished" ? "opacity-40" : ""
         }`}
         tabIndex={0}
+        onKeyUp={handleKeyUp}
       >
-        <div ref={wordsRef} className={`text-gray-500 `}>
+        <div
+          ref={wordsRef}
+          className={`text-container select-none text-textSecondary`}
+        >
           {gameState.words.map((word, wordIndex) => (
-            <div key={wordIndex} className="inline-block font-mono mx-1">
+            <div
+              key={wordIndex}
+              className="word inline-block font-robotoMono mx-1"
+            >
               {word.split("").map((letter, letterIndex) => (
                 <span key={letterIndex} className="letter">
                   {letter}
@@ -308,15 +204,7 @@ function App() {
             </div>
           ))}
         </div>
-        {gameState.gameStatus !== "finished" && (
-          <div
-            className="w-0.5 h-6 bg-yellow-400 fixed animate-[blink_0.3s_infinite]"
-            style={{
-              top: `${getCursorPosition().top}px`,
-              left: `${getCursorPosition().left}px`,
-            }}
-          />
-        )}
+        <div className="w-full h-[108px] absolute top-0 left-0  bg-transparent"></div>
       </div>
     </div>
   );
