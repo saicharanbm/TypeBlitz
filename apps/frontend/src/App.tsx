@@ -1,12 +1,13 @@
 import { Play } from "lucide-react";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { words } from "./utils/data";
-import { GameState, LetterInfo, letterType } from "./types";
+import { GameState, letterType } from "./types";
 
 function App() {
   const GAME_TIME = useRef<number>(30); // Time in seconds
   const [gameState, setGameState] = useState<GameState>({
     words: [],
+    originalWords: [],
     currentWordIndex: 0,
     currentLetterIndex: 0,
     gameStatus: "waiting",
@@ -16,19 +17,24 @@ function App() {
   const wordsRef = useRef<HTMLDivElement | null>(null);
   const gameRef = useRef<HTMLDivElement | null>(null);
 
-  const getRandomWord = (): LetterInfo[] => {
+  const getRandomWord = (): string => {
     const randomIndex = Math.floor(Math.random() * words.length);
     const word = words[randomIndex];
-    const newWord = word
-      .split("")
-      .map((letter) => ({ letter, type: letterType.normal }));
-    return newWord;
+
+    return word;
   };
 
   const initializeGame = useCallback((): void => {
-    const newWords = Array.from({ length: 200 }, () => getRandomWord());
+    const newOriginalWords = Array.from({ length: 200 }, () => getRandomWord());
+    const newWords = newOriginalWords.map((word) => {
+      const newWord = word
+        .split("")
+        .map((letter) => ({ letter, type: letterType.normal }));
+      return newWord;
+    });
     setGameState({
       words: newWords,
+      originalWords: newOriginalWords,
       currentWordIndex: 0,
       currentLetterIndex: 0,
       gameStatus: "waiting",
@@ -88,34 +94,48 @@ function App() {
     }
     //get the current word html element and current letter html element to verify that the user is typing the correct letter
 
-    const currentWordDiv =
-      wordsRef.current?.children[gameState.currentWordIndex];
-    if (!currentWordDiv) return;
+    const currentWord = gameState.words[gameState.currentWordIndex];
+    // const currentWordDiv =
+    //   wordsRef.current?.children[gameState.currentWordIndex];
+    if (!currentWord) return;
 
     if (isLetter) {
-      const currentLetter =
-        currentWordDiv.children[gameState.currentLetterIndex];
+      const currentLetter = currentWord[gameState.currentLetterIndex];
 
-      if (currentLetter && currentLetter.textContent === key) {
+      if (!currentLetter) {
+        // Add the letter with incorrect class to the current wordDiv
+        currentWord.push({ letter: key, type: letterType.incorrect });
+        setGameState((prev) => {
+          const updatedWords = [...prev.words];
+          updatedWords[prev.currentWordIndex] = currentWord;
+          return {
+            ...prev,
+            words: updatedWords,
+          };
+        });
+      } else if (currentLetter.letter === key) {
         // Add the correct class to the letter and remove incorrect class
-        currentLetter.classList.add("text-correct");
-        currentLetter.classList.remove("text-incorrect");
-        currentLetter.classList.remove("text-textSecondary");
+        currentLetter.type = letterType.correct;
+        setGameState((prev) => {
+          const updatedWords = [...prev.words];
+          updatedWords[prev.currentWordIndex][prev.currentLetterIndex] =
+            currentLetter;
+          return {
+            ...prev,
+            words: updatedWords,
+          };
+        });
       } else {
-        if (
-          gameState.currentLetterIndex >=
-          gameState.words[gameState.currentWordIndex].length
-        ) {
-          // Add the letter with incorrect class to the current wordDiv
-          const incorrectLetter = document.createElement("span");
-          incorrectLetter.className = "letter text-incorrect";
-          incorrectLetter.textContent = key;
-          currentWordDiv.appendChild(incorrectLetter);
-        } else if (currentLetter) {
-          currentLetter.classList.add("text-incorrect");
-          currentLetter.classList.remove("text-correct");
-          currentLetter.classList.remove("text-textSecondary");
-        }
+        currentLetter.type = letterType.incorrect;
+        setGameState((prev) => {
+          const updatedWords = [...prev.words];
+          updatedWords[prev.currentWordIndex][prev.currentLetterIndex] =
+            currentLetter;
+          return {
+            ...prev,
+            words: updatedWords,
+          };
+        });
       }
     }
 
@@ -134,10 +154,18 @@ function App() {
         return;
       }
       // get the current letter and add the incorrect class
-      const currentLetter =
-        currentWordDiv.children[gameState.currentLetterIndex];
+      const currentLetter = currentWord[gameState.currentLetterIndex];
       if (currentLetter) {
-        currentLetter.classList.add("text-incorrect");
+        currentLetter.type = letterType.incorrect;
+        setGameState((prev) => {
+          const updatedWords = [...prev.words];
+          updatedWords[prev.currentWordIndex][prev.currentLetterIndex] =
+            currentLetter;
+          return {
+            ...prev,
+            words: updatedWords,
+          };
+        });
       }
       return;
     }
@@ -152,17 +180,32 @@ function App() {
         return;
 
       if (gameState.currentLetterIndex !== 0) {
-        const currentLetter =
-          currentWordDiv.children[gameState.currentLetterIndex - 1];
+        const currentLetter = currentWord[gameState.currentLetterIndex];
         if (currentLetter) {
           if (
             gameState.currentLetterIndex >
-            gameState.words[gameState.currentWordIndex].length
+            gameState.originalWords[gameState.currentWordIndex].length
           ) {
-            console.log("hello");
-            currentWordDiv.removeChild(currentLetter);
+            //remove the last letter of the current word
+            setGameState((prev) => {
+              const updatedWords = [...prev.words];
+              updatedWords.pop();
+              return {
+                ...prev,
+                words: updatedWords,
+              };
+            });
           } else {
-            currentLetter.classList.remove("text-correct", "text-incorrect");
+            currentLetter.type = letterType.normal;
+            setGameState((prev) => {
+              const updatedWords = [...prev.words];
+              updatedWords[prev.currentWordIndex][prev.currentLetterIndex] =
+                currentLetter;
+              return {
+                ...prev,
+                words: updatedWords,
+              };
+            });
           }
         }
         setGameState((prev) => ({

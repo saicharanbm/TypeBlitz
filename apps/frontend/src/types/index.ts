@@ -1,5 +1,6 @@
 export interface GameState {
   words: LetterInfo[][];
+  originalWords: string[];
   currentWordIndex: number;
   currentLetterIndex: number;
   gameStatus: "waiting" | "playing" | "finished";
