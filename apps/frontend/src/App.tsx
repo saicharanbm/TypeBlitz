@@ -1,7 +1,7 @@
 import { Play } from "lucide-react";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { words } from "./utils/data";
-import { GameState } from "./types";
+import { GameState, LetterInfo, letterType } from "./types";
 
 function App() {
   const GAME_TIME = useRef<number>(30); // Time in seconds
@@ -16,9 +16,13 @@ function App() {
   const wordsRef = useRef<HTMLDivElement | null>(null);
   const gameRef = useRef<HTMLDivElement | null>(null);
 
-  const getRandomWord = (): string => {
+  const getRandomWord = (): LetterInfo[] => {
     const randomIndex = Math.floor(Math.random() * words.length);
-    return words[randomIndex];
+    const word = words[randomIndex];
+    const newWord = word
+      .split("")
+      .map((letter) => ({ letter, type: letterType.normal }));
+    return newWord;
   };
 
   const initializeGame = useCallback((): void => {
@@ -230,9 +234,9 @@ function App() {
               key={wordIndex}
               className={`word inline-block font-robotoMono mx-1 `}
             >
-              {word.split("").map((letter, letterIndex) => (
-                <span key={letterIndex} className="letter text-textSecondary">
-                  {letter}
+              {word.map((data, letterIndex) => (
+                <span key={letterIndex} className={`letter ${data.type}`}>
+                  {data.letter}
                 </span>
               ))}
             </div>
