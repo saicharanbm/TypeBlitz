@@ -1,4 +1,3 @@
-import { Play } from "lucide-react";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { words } from "./utils/data";
 import { GameState, letterType } from "./types";
@@ -25,7 +24,11 @@ function App() {
   };
 
   const initializeGame = useCallback((): void => {
-    const newOriginalWords = Array.from({ length: 200 }, () => getRandomWord());
+    const newOriginalWords = Array.from({ length: 200 }, (_, id) => {
+      const word = getRandomWord();
+      console.log(id);
+      return id === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word;
+    });
     const newWords = newOriginalWords.map((word) => {
       const newWord = word
         .split("")
@@ -172,24 +175,27 @@ function App() {
 
     if (isBackspace) {
       //we need to handle 2 cases 1) backspace i  the middle of the word and 2) backspace at the start of the word
+      const currentLetterIndex = gameState.currentLetterIndex - 1;
+      console.log(currentLetterIndex, gameState.currentWordIndex);
 
-      if (
-        gameState.currentLetterIndex === 0 &&
-        gameState.currentWordIndex === 0
-      )
-        return;
+      if (currentLetterIndex < 0 && gameState.currentWordIndex === 0) return;
+      console.log("hello");
 
-      if (gameState.currentLetterIndex !== 0) {
-        const currentLetter = currentWord[gameState.currentLetterIndex];
+      if (currentLetterIndex >= 0) {
+        const currentLetter = currentWord[currentLetterIndex];
         if (currentLetter) {
-          if (
-            gameState.currentLetterIndex >
+          console.log(
             gameState.originalWords[gameState.currentWordIndex].length
+          );
+          if (
+            currentLetterIndex >
+            gameState.originalWords[gameState.currentWordIndex].length - 1
           ) {
             //remove the last letter of the current word
             setGameState((prev) => {
               const updatedWords = [...prev.words];
-              updatedWords.pop();
+              console.log(updatedWords[prev.currentWordIndex]);
+              updatedWords[prev.currentWordIndex].splice(currentLetterIndex, 1);
               return {
                 ...prev,
                 words: updatedWords,
@@ -199,7 +205,7 @@ function App() {
             currentLetter.type = letterType.normal;
             setGameState((prev) => {
               const updatedWords = [...prev.words];
-              updatedWords[prev.currentWordIndex][prev.currentLetterIndex] =
+              updatedWords[prev.currentWordIndex][currentLetterIndex] =
                 currentLetter;
               return {
                 ...prev,
@@ -239,8 +245,74 @@ function App() {
   return (
     <div className="max-w-[1400px] min h-screen mx-auto pt-12 px-4 sm:px-6 lg:px-12">
       <nav>
+        <div className="p-0 m-0 w-28">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="50 50 200 100"
+            width="100%"
+            height="auto"
+            preserveAspectRatio="none"
+          >
+            <rect
+              x="50"
+              y="50"
+              width="200"
+              height="100"
+              rx="15"
+              fill="#e0e0e0"
+              stroke="#333333"
+              stroke-width="4"
+            />
+
+            <g fill="#ffffff" stroke="#333333" stroke-width="2">
+              <rect x="60" y="60" width="45" height="45" rx="5" />
+              <rect x="110" y="60" width="20" height="20" rx="5" />
+              <rect x="135" y="60" width="20" height="20" rx="5" />
+              <rect x="160" y="60" width="20" height="20" rx="5" />
+              <rect x="185" y="60" width="20" height="20" rx="5" />
+              <rect x="210" y="60" width="20" height="20" rx="5" />
+
+              <rect x="110" y="85" width="20" height="20" rx="5" />
+              <rect x="135" y="85" width="20" height="20" rx="5" />
+              <rect x="160" y="85" width="20" height="20" rx="5" />
+
+              <rect x="60" y="110" width="20" height="20" rx="5" />
+              <rect x="85" y="110" width="20" height="20" rx="5" />
+              <rect x="110" y="110" width="20" height="20" rx="5" />
+              <rect x="135" y="110" width="20" height="20" rx="5" />
+              <rect x="160" y="110" width="20" height="20" rx="5" />
+
+              <rect x="185" y="85" width="45" height="45" rx="5" />
+            </g>
+
+            <text
+              x="82"
+              y="85"
+              font-family="Arial"
+              font-size="30"
+              font-weight="bold"
+              fill="#333333"
+              text-anchor="middle"
+              dominant-baseline="middle"
+            >
+              T
+            </text>
+
+            <text
+              x="207"
+              y="110"
+              font-family="Arial"
+              font-size="30"
+              font-weight="bold"
+              fill="#333333"
+              text-anchor="middle"
+              dominant-baseline="middle"
+            >
+              B
+            </text>
+          </svg>
+        </div>
         <h1 className="text-2xl md:text-3xl lg:text-4xl text-textPrimary flex items-center gap-2 mb-8">
-          <Play className="w-8 h-8 text-primaryColor" />
           TypeBlitz
         </h1>
       </nav>
@@ -266,7 +338,7 @@ function App() {
         tabIndex={0}
         role="textbox"
         aria-label="Typing area"
-        onKeyUp={handleKeyUp}
+        onKeyDown={handleKeyUp}
       >
         <div
           ref={wordsRef}
