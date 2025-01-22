@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { words } from "./utils/data";
 import { GameState, letterType } from "./types";
+import Icon from "./components/Icon";
 
 function App() {
   const GAME_TIME = useRef<number>(30); // Time in seconds
@@ -26,7 +27,6 @@ function App() {
   const initializeGame = useCallback((): void => {
     const newOriginalWords = Array.from({ length: 200 }, (_, id) => {
       const word = getRandomWord();
-      console.log(id);
       return id === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word;
     });
     const newWords = newOriginalWords.map((word) => {
@@ -243,78 +243,16 @@ function App() {
   };
 
   return (
-    <div className="max-w-[1400px] min h-screen mx-auto pt-12 px-4 sm:px-6 lg:px-12">
-      <nav>
-        <div className="p-0 m-0 w-28">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="50 50 200 100"
-            width="100%"
-            height="auto"
-            preserveAspectRatio="none"
-          >
-            <rect
-              x="50"
-              y="50"
-              width="200"
-              height="100"
-              rx="15"
-              fill="#e0e0e0"
-              stroke="#333333"
-              stroke-width="4"
-            />
-
-            <g fill="#ffffff" stroke="#333333" stroke-width="2">
-              <rect x="60" y="60" width="45" height="45" rx="5" />
-              <rect x="110" y="60" width="20" height="20" rx="5" />
-              <rect x="135" y="60" width="20" height="20" rx="5" />
-              <rect x="160" y="60" width="20" height="20" rx="5" />
-              <rect x="185" y="60" width="20" height="20" rx="5" />
-              <rect x="210" y="60" width="20" height="20" rx="5" />
-
-              <rect x="110" y="85" width="20" height="20" rx="5" />
-              <rect x="135" y="85" width="20" height="20" rx="5" />
-              <rect x="160" y="85" width="20" height="20" rx="5" />
-
-              <rect x="60" y="110" width="20" height="20" rx="5" />
-              <rect x="85" y="110" width="20" height="20" rx="5" />
-              <rect x="110" y="110" width="20" height="20" rx="5" />
-              <rect x="135" y="110" width="20" height="20" rx="5" />
-              <rect x="160" y="110" width="20" height="20" rx="5" />
-
-              <rect x="185" y="85" width="45" height="45" rx="5" />
-            </g>
-
-            <text
-              x="82"
-              y="85"
-              font-family="Arial"
-              font-size="30"
-              font-weight="bold"
-              fill="#333333"
-              text-anchor="middle"
-              dominant-baseline="middle"
-            >
-              T
-            </text>
-
-            <text
-              x="207"
-              y="110"
-              font-family="Arial"
-              font-size="30"
-              font-weight="bold"
-              fill="#333333"
-              text-anchor="middle"
-              dominant-baseline="middle"
-            >
-              B
-            </text>
-          </svg>
+    <div className="max-w-[1400px] min h-screen mx-auto pt-12 px-4 sm:px-6 lg:px-12 font-robotoSans">
+      <nav className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-2 lg:gap-4">
+          <div className="w-12 md:w-24 lg:w-28">
+            <Icon />
+          </div>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl text-[#d7d6ce] font-bold">
+            TypeBlitz
+          </h1>
         </div>
-        <h1 className="text-2xl md:text-3xl lg:text-4xl text-textPrimary flex items-center gap-2 mb-8">
-          TypeBlitz
-        </h1>
       </nav>
 
       <div className="flex justify-between select-none items-center mb-8">
@@ -332,7 +270,7 @@ function App() {
       </div>
       <div
         ref={gameRef}
-        className={`game-area relative h-[108px] overflow-hidden leading-9 focus:outline-none ${
+        className={`game-area relative h-[108px] overflow-hidden leading-9 focus:outline-none font-robotoMono ${
           gameState.gameStatus === "finished" ? "opacity-40" : ""
         }`}
         tabIndex={0}
@@ -345,10 +283,7 @@ function App() {
           className="text-container select-none text-textSecondary"
         >
           {gameState.words.map((word, wordIndex) => (
-            <div
-              key={wordIndex}
-              className={`word inline-block font-robotoMono mx-1 `}
-            >
+            <div key={wordIndex} className={`word inline-block  mx-1 `}>
               {word.map((data, letterIndex) => (
                 <span key={letterIndex} className={`letter ${data.type}`}>
                   {data.letter}

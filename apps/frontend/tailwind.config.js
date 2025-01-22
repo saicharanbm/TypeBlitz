@@ -13,6 +13,7 @@ export default {
       },
       fontFamily: {
         robotoMono: ["Roboto Mono", "monospace"], // Custom font
+        robotoSans: ["Roboto", "sans-serif"], // Custom font
       },
       userSelect: {
         none: "none",
