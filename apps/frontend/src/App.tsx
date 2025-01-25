@@ -101,6 +101,12 @@ function App() {
     // const currentWordDiv =
     //   wordsRef.current?.children[gameState.currentWordIndex];
     if (!currentWord) return;
+    const updateGameState = () => {
+      setGameState((prev) => ({
+        ...prev,
+        currentLetterIndex: prev.currentLetterIndex + 1,
+      }));
+    };
 
     if (isLetter) {
       const currentLetter = currentWord[gameState.currentLetterIndex];
@@ -140,6 +146,7 @@ function App() {
           };
         });
       }
+      updateGameState();
     }
 
     if (isSpace) {
@@ -235,11 +242,6 @@ function App() {
       }));
       return;
     }
-
-    setGameState((prev) => ({
-      ...prev,
-      currentLetterIndex: prev.currentLetterIndex + 1,
-    }));
   };
 
   return (
