@@ -50,11 +50,17 @@ body {
   margin-top: 7px;
   height: 1.4rem;
   border-left: 2px solid var(--primaryColor); /* Customize the cursor style */
-  animation: blink 1s step-end infinite;
+  animation: blink 1s infinite;
+  border-radius: 10px;
 }
 
 @keyframes blink {
-  50% {
+  0%,
+  100% {
     opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
   }
 }

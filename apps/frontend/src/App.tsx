@@ -4,7 +4,7 @@ import { GameState, letterType } from "./types";
 import Icon from "./components/Icon";
 
 function App() {
-  const GAME_TIME = useRef<number>(300); // Time in seconds
+  const GAME_TIME = useRef<number>(30); // Time in seconds
   const [gameState, setGameState] = useState<GameState>({
     words: [],
     originalWords: [],
@@ -12,6 +12,7 @@ function App() {
     currentLetterIndex: 0,
     gameStatus: "waiting",
     timeLeft: GAME_TIME.current,
+    focus: false,
     wpm: 0,
   });
   const wordsRef = useRef<HTMLDivElement | null>(null);
@@ -38,6 +39,7 @@ function App() {
       currentLetterIndex: 0,
       gameStatus: "waiting",
       timeLeft: GAME_TIME.current,
+      focus: true,
       wpm: 0,
     });
     gameRef.current?.focus();
@@ -46,6 +48,36 @@ function App() {
   useEffect(() => {
     initializeGame();
   }, [initializeGame]);
+
+  useEffect(() => {
+    // initializeGame();
+
+    const checkFocus = () => {
+      if (gameRef.current === document.activeElement) {
+        setGameState((prev) => {
+          const updatedWords = { ...prev, focus: true };
+          console.log("In focus : ", updatedWords.focus);
+          return updatedWords;
+        });
+
+        console.log("Game div is in focus");
+      } else {
+        console.log("Game div is not in focus");
+        setGameState((prev) => {
+          const updatedWords = { ...prev, focus: false };
+          console.log("Out of focus : ", updatedWords.focus);
+          return updatedWords;
+        });
+      }
+    };
+    document.addEventListener("focusin", checkFocus);
+    document.addEventListener("focusout", checkFocus);
+
+    return () => {
+      document.removeEventListener("focusin", checkFocus);
+      document.removeEventListener("focusout", checkFocus);
+    };
+  }, []);
 
   useEffect(() => {
     if (gameState.gameStatus === "playing") {
@@ -168,6 +200,7 @@ function App() {
           return {
             ...prev,
             words: updatedWords,
+            currentLetterIndex: prev.currentLetterIndex - 1,
           };
         });
         return;
@@ -206,38 +239,51 @@ function App() {
           New game
         </button>
       </div>
-      <div
-        ref={gameRef}
-        className={`game-area relative h-[108px] overflow-hidden leading-9 focus:outline-none font-robotoMono ${
-          gameState.gameStatus === "finished" ? "opacity-40" : ""
-        }`}
-        tabIndex={0}
-        role="textbox"
-        aria-label="Typing area"
-        onKeyDown={handleKeyUp}
-      >
-        <div
-          ref={wordsRef}
-          className="text-container select-none text-textSecondary"
-        >
-          {gameState.words.map((word, wordIndex) => (
-            <div key={wordIndex} className={`word inline-block mx-1`}>
-              {word.map((data, letterIndex) => (
-                <span key={letterIndex} className={`letter ${data.type}`}>
-                  {wordIndex === gameState.currentWordIndex &&
-                  letterIndex === gameState.currentLetterIndex ? (
-                    <span className="blinking-cursor"></span>
-                  ) : null}
-                  {data.letter}
-                </span>
-              ))}
-              {wordIndex === gameState.currentWordIndex &&
-                gameState.currentLetterIndex >=
-                  gameState.words[gameState.currentWordIndex].length && (
-                  <span className="blinking-cursor"></span>
-                )}
+      <div className=" relative h-[108px] w-full">
+        {gameState.focus ? (
+          <div
+            className="absolute z-50 h-[108px] w-full "
+            onClick={() => gameRef.current?.focus()}
+          >
+            <div className="w-full h-full flex items-center justify-center">
+              Hello
             </div>
-          ))}
+          </div>
+        ) : null}
+
+        <div
+          ref={gameRef}
+          className={`game-area h-[108px] overflow-hidden leading-9 focus:outline-none font-robotoMono ${
+            gameState.gameStatus === "finished" ? "opacity-40" : ""
+          }`}
+          tabIndex={0}
+          role="textbox"
+          aria-label="Typing area"
+          onKeyDown={handleKeyUp}
+        >
+          <div
+            ref={wordsRef}
+            className="text-container select-none text-textSecondary"
+          >
+            {gameState.words.map((word, wordIndex) => (
+              <div key={wordIndex} className={`word inline-block mx-1`}>
+                {word.map((data, letterIndex) => (
+                  <span key={letterIndex} className={`letter ${data.type}`}>
+                    {wordIndex === gameState.currentWordIndex &&
+                    letterIndex === gameState.currentLetterIndex ? (
+                      <span className="blinking-cursor"></span>
+                    ) : null}
+                    {data.letter}
+                  </span>
+                ))}
+                {wordIndex === gameState.currentWordIndex &&
+                  gameState.currentLetterIndex >=
+                    gameState.words[gameState.currentWordIndex].length && (
+                    <span className="blinking-cursor"></span>
+                  )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

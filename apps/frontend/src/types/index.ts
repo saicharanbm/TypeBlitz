@@ -5,6 +5,7 @@ export interface GameState {
   currentLetterIndex: number;
   gameStatus: "waiting" | "playing" | "finished";
   timeLeft: number;
+  focus: boolean;
   wpm: number;
 }
 

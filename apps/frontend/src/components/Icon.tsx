@@ -15,10 +15,10 @@ function Icon() {
         rx="15"
         fill="#e0e0e0"
         stroke="#333437"
-        stroke-width="4"
+        strokeWidth="4"
       />
 
-      <g fill="#ffffff" stroke="#333333" stroke-width="2">
+      <g fill="#ffffff" stroke="#333333" strokeWidth="2">
         <rect x="64" y="64" width="45" height="45" rx="5" />
         <rect x="114" y="64" width="20" height="20" rx="5" />
         <rect x="139" y="64" width="20" height="20" rx="5" />
@@ -42,12 +42,12 @@ function Icon() {
       <text
         x="86"
         y="89"
-        font-family="Arial"
-        font-size="30"
-        font-weight="bold"
+        fontFamily="Arial"
+        fontSize="30"
+        fontWeight="bold"
         fill="#333333"
-        text-anchor="middle"
-        dominant-baseline="middle"
+        textAnchor="middle"
+        dominantBaseline="middle"
       >
         T
       </text>
@@ -55,12 +55,12 @@ function Icon() {
       <text
         x="211"
         y="114"
-        font-family="Arial"
-        font-size="30"
-        font-weight="bold"
+        fontFamily="Arial"
+        fontSize="30"
+        fontWeight="bold"
         fill="#333333"
-        text-anchor="middle"
-        dominant-baseline="middle"
+        textAnchor="middle"
+        dominantBaseline="middle"
       >
         B
       </text>
