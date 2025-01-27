@@ -1,6 +1,10 @@
 import { User } from "./User";
+interface roomData {
+  users: User[];
+  words: string;
+}
 export class RoomManager {
-  rooms: Map<string, User[]> = new Map<string, User[]>();
+  rooms: Map<string, roomData> = new Map<string, roomData>();
   private static instance: RoomManager = new RoomManager();
   private constructor() {}
   static getInstance() {
@@ -9,39 +13,43 @@ export class RoomManager {
     }
     return RoomManager.instance;
   }
-  removeUserFromSpace(roomId: string, user: User) {
-    const users = this.rooms.get(roomId);
-    if (users) {
-      this.rooms.set(
-        roomId,
-        users.filter((u) => u.id !== user.id)
-      );
+  removeUserFromRoom(roomId: string, userId: string) {
+    const data = this.rooms.get(roomId);
+    if (data) {
+      this.rooms.set(roomId, {
+        users: data.users.filter((u) => u.id !== userId),
+        words: data.words,
+      });
     }
   }
   verifyIfRoomExist(roomId: string): boolean {
     if (this.rooms.has(roomId)) return true;
     return false;
   }
-  verifyIfUserNameExistInTheRoom(roomId: string, userId: string): boolean {
-    const users = this.rooms.get(roomId);
+  verifyIfUserNameExistInTheRoom(roomId: string, name: string): boolean {
+    const data = this.rooms.get(roomId);
 
-    return users ? users.some((user) => user.id === userId) : false;
+    return data?.users ? data.users.some((user) => user.name === name) : false;
   }
 
-  addUserToSpace(roomId: string, user: User) {
-    const users = this.rooms.get(roomId);
+  addUserToRoom(roomId: string, user: User) {
+    const data = this.rooms.get(roomId);
+    const users = data?.users;
     if (users) {
-      this.rooms.set(roomId, [...users, user]);
+      this.rooms.set(roomId, { users: [...users, user], words: data.words });
     } else {
-      this.rooms.set(roomId, [user]);
+      //generate words
+      const words = "";
+      this.rooms.set(roomId, { users: [user], words });
     }
   }
-  broadcastMessage(roomId: string, message: any, user: User) {
-    const users = this.rooms.get(roomId);
+  broadcastMessage(roomId: string, message: any, userId: string) {
+    const data = this.rooms.get(roomId);
+    const users = data?.users;
     if (users) {
-      users.forEach((u) => {
-        if (u.id !== user.id) {
-          u.sendMessage(message);
+      users.forEach((user) => {
+        if (user.id !== userId) {
+          user.sendMessage(message);
         }
       });
     }
