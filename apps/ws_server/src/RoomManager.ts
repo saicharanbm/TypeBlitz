@@ -1,7 +1,8 @@
 import { User } from "./User";
+import { getRandomWord } from "./utils";
 interface roomData {
   users: User[];
-  words: string;
+  words: string[];
 }
 export class RoomManager {
   rooms: Map<string, roomData> = new Map<string, roomData>();
@@ -39,7 +40,11 @@ export class RoomManager {
       this.rooms.set(roomId, { users: [...users, user], words: data.words });
     } else {
       //generate words
-      const words = "";
+      const words = Array.from({ length: 200 }, (_, id) => {
+        const word = getRandomWord();
+        return id === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word;
+      });
+
       this.rooms.set(roomId, { users: [user], words });
     }
   }
