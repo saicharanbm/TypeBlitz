@@ -239,17 +239,20 @@ function App() {
           New game
         </button>
       </div>
-      <div className=" relative h-[108px] w-full">
-        {gameState.focus ? (
+      <div className=" relative h-[108px] w-full  ">
+        {!gameState.focus && (
           <div
-            className="absolute z-50 h-[108px] w-full "
-            onClick={() => gameRef.current?.focus()}
+            className="absolute z-50 h-[108px] w-full bg-[rgb(61,61,58,0.1)] backdrop-blur-sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              gameRef.current?.focus();
+            }}
           >
-            <div className="w-full h-full flex items-center justify-center">
-              Hello
+            <div className="w-full h-full flex items-center justify-center ">
+              Click here to focus.
             </div>
           </div>
-        ) : null}
+        )}
 
         <div
           ref={gameRef}
