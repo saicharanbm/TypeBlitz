@@ -4,7 +4,7 @@ import { GameState, letterType } from "./types";
 import Icon from "./components/Icon";
 
 function App() {
-  const GAME_TIME = useRef<number>(30); // Time in seconds
+  const GAME_TIME = useRef<number>(300); // Time in seconds
   const [gameState, setGameState] = useState<GameState>({
     words: [],
     originalWords: [],
@@ -19,9 +19,7 @@ function App() {
 
   const getRandomWord = (): string => {
     const randomIndex = Math.floor(Math.random() * words.length);
-    const word = words[randomIndex];
-
-    return word;
+    return words[randomIndex];
   };
 
   const initializeGame = useCallback((): void => {
@@ -29,12 +27,10 @@ function App() {
       const word = getRandomWord();
       return id === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word;
     });
-    const newWords = newOriginalWords.map((word) => {
-      const newWord = word
-        .split("")
-        .map((letter) => ({ letter, type: letterType.normal }));
-      return newWord;
-    });
+    const newWords = newOriginalWords.map((word) =>
+      word.split("").map((letter) => ({ letter, type: letterType.normal }))
+    );
+
     setGameState({
       words: newWords,
       originalWords: newOriginalWords,
@@ -82,80 +78,47 @@ function App() {
   }, [gameState.gameStatus]);
 
   const handleKeyUp = (event: React.KeyboardEvent<HTMLDivElement>): void => {
-    // if the game is finished return
     if (gameState.gameStatus === "finished") return;
 
     const { key } = event;
-    //we need to handel 3 conditions letter, space, backspace
     const isLetter = key.length === 1 && key !== " ";
     const isSpace = key === " ";
     const isBackspace = key === "Backspace";
 
-    //if the game is waiting and a letter is pressed, start the game
     if (gameState.gameStatus === "waiting" && isLetter) {
       setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
     }
-    //get the current word html element and current letter html element to verify that the user is typing the correct letter
 
     const currentWord = gameState.words[gameState.currentWordIndex];
-    // const currentWordDiv =
-    //   wordsRef.current?.children[gameState.currentWordIndex];
     if (!currentWord) return;
-    const updateGameState = () => {
-      setGameState((prev) => ({
-        ...prev,
-        currentLetterIndex: prev.currentLetterIndex + 1,
-      }));
-    };
 
     if (isLetter) {
       const currentLetter = currentWord[gameState.currentLetterIndex];
 
       if (!currentLetter) {
-        // Add the letter with incorrect class to the current wordDiv
         currentWord.push({ letter: key, type: letterType.incorrect });
-        setGameState((prev) => {
-          const updatedWords = [...prev.words];
-          updatedWords[prev.currentWordIndex] = currentWord;
-          return {
-            ...prev,
-            words: updatedWords,
-          };
-        });
       } else if (currentLetter.letter === key) {
-        // Add the correct class to the letter and remove incorrect class
         currentLetter.type = letterType.correct;
-        setGameState((prev) => {
-          const updatedWords = [...prev.words];
-          updatedWords[prev.currentWordIndex][prev.currentLetterIndex] =
-            currentLetter;
-          return {
-            ...prev,
-            words: updatedWords,
-          };
-        });
       } else {
         currentLetter.type = letterType.incorrect;
-        setGameState((prev) => {
-          const updatedWords = [...prev.words];
-          updatedWords[prev.currentWordIndex][prev.currentLetterIndex] =
-            currentLetter;
-          return {
-            ...prev,
-            words: updatedWords,
-          };
-        });
       }
-      updateGameState();
+
+      setGameState((prev) => {
+        const updatedWords = [...prev.words];
+        updatedWords[prev.currentWordIndex] = currentWord;
+        return {
+          ...prev,
+          words: updatedWords,
+          currentLetterIndex: prev.currentLetterIndex + 1,
+        };
+      });
     }
 
     if (isSpace) {
-      //we need to handle 2 cases 1) space i  the middle of the word and 2) space at the end of the word
       if (
         gameState.currentLetterIndex >=
         gameState.words[gameState.currentWordIndex].length
       ) {
-        //we need to move to the next word
         setGameState((prev) => ({
           ...prev,
           currentWordIndex: prev.currentWordIndex + 1,
@@ -163,84 +126,57 @@ function App() {
         }));
         return;
       }
-      // get the current letter and add the incorrect class
-      const currentLetter = currentWord[gameState.currentLetterIndex];
-      if (currentLetter) {
-        currentLetter.type = letterType.incorrect;
+    }
+
+    if (isBackspace) {
+      const currentLetterIndex = gameState.currentLetterIndex - 1;
+
+      if (currentLetterIndex < 0 && gameState.currentWordIndex === 0) return;
+
+      if (currentLetterIndex >= 0) {
+        if (
+          currentLetterIndex >
+          gameState.originalWords[gameState.currentWordIndex].length - 1
+        ) {
+          //remove the last letter of the current word
+          setGameState((prev) => {
+            const updatedWords = prev.words.map((word, index) =>
+              index === prev.currentWordIndex ? [...word] : word
+            );
+            updatedWords[prev.currentWordIndex].splice(currentLetterIndex, 1);
+
+            return {
+              ...prev,
+              words: updatedWords,
+              currentLetterIndex: prev.currentLetterIndex - 1,
+            };
+          });
+          return;
+        }
+
         setGameState((prev) => {
-          const updatedWords = [...prev.words];
-          updatedWords[prev.currentWordIndex][prev.currentLetterIndex] =
-            currentLetter;
+          const updatedWords = prev.words.map((word, index) =>
+            index === prev.currentWordIndex
+              ? word.map((letter, i) =>
+                  i === currentLetterIndex
+                    ? { ...letter, type: letterType.normal }
+                    : letter
+                )
+              : word
+          );
+
           return {
             ...prev,
             words: updatedWords,
           };
         });
-      }
-      return;
-    }
-
-    if (isBackspace) {
-      //we need to handle 2 cases 1) backspace i  the middle of the word and 2) backspace at the start of the word
-      const currentLetterIndex = gameState.currentLetterIndex - 1;
-      console.log(currentLetterIndex, gameState.currentWordIndex);
-
-      if (currentLetterIndex < 0 && gameState.currentWordIndex === 0) return;
-      console.log("hello");
-
-      if (currentLetterIndex >= 0) {
-        const currentLetter = currentWord[currentLetterIndex];
-        if (currentLetter) {
-          console.log(
-            gameState.originalWords[gameState.currentWordIndex].length
-          );
-          if (
-            currentLetterIndex >
-            gameState.originalWords[gameState.currentWordIndex].length - 1
-          ) {
-            //remove the last letter of the current word
-            setGameState((prev) => {
-              const updatedWords = [...prev.words];
-              console.log(updatedWords[prev.currentWordIndex]);
-              updatedWords[prev.currentWordIndex].splice(currentLetterIndex, 1);
-              return {
-                ...prev,
-                words: updatedWords,
-              };
-            });
-          } else {
-            currentLetter.type = letterType.normal;
-            setGameState((prev) => {
-              const updatedWords = [...prev.words];
-              updatedWords[prev.currentWordIndex][currentLetterIndex] =
-                currentLetter;
-              return {
-                ...prev,
-                words: updatedWords,
-              };
-            });
-          }
-        }
-        setGameState((prev) => ({
-          ...prev,
-          currentLetterIndex: prev.currentLetterIndex - 1,
-        }));
         return;
       }
-
-      // move the pointer to the end of the previous word
-      // end of prevoius word might not be its lenght because of the error text at the end
-      // so het the content of that div
-      const previousWordDiv =
-        wordsRef.current?.children[gameState.currentWordIndex - 1];
-      if (!previousWordDiv) return;
-
       setGameState((prev) => ({
         ...prev,
         currentWordIndex: prev.currentWordIndex - 1,
-        currentLetterIndex: previousWordDiv.children.length,
+        currentLetterIndex: prev.words[prev.currentWordIndex - 1].length || 0,
       }));
-      return;
     }
   };
 
@@ -285,12 +221,21 @@ function App() {
           className="text-container select-none text-textSecondary"
         >
           {gameState.words.map((word, wordIndex) => (
-            <div key={wordIndex} className={`word inline-block  mx-1 `}>
+            <div key={wordIndex} className={`word inline-block mx-1`}>
               {word.map((data, letterIndex) => (
                 <span key={letterIndex} className={`letter ${data.type}`}>
+                  {wordIndex === gameState.currentWordIndex &&
+                  letterIndex === gameState.currentLetterIndex ? (
+                    <span className="blinking-cursor"></span>
+                  ) : null}
                   {data.letter}
                 </span>
               ))}
+              {wordIndex === gameState.currentWordIndex &&
+                gameState.currentLetterIndex >=
+                  gameState.words[gameState.currentWordIndex].length && (
+                  <span className="blinking-cursor"></span>
+                )}
             </div>
           ))}
         </div>

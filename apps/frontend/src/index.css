@@ -23,11 +23,12 @@ body {
   -ms-user-select: none;  */
 }
 
-.blinking-cursor {
+/* .blinking-cursor {
   display: inline-block;
-  width: 8px;
-  height: 1em;
-  background-color: #ffcc00; /* Or any color you prefer */
+  width: 2px;
+  height: 1.4rem;
+  background: var(--primaryColor);
+
   animation: blink 0.8s infinite;
 }
 
@@ -40,5 +41,20 @@ body {
   }
   100% {
     opacity: 1;
+  }
+} */
+
+.blinking-cursor {
+  position: absolute;
+  width: 0;
+  margin-top: 7px;
+  height: 1.4rem;
+  border-left: 2px solid var(--primaryColor); /* Customize the cursor style */
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
   }
 }
