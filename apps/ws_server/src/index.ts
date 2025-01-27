@@ -1,5 +1,5 @@
 import { WebSocketServer } from "ws";
-import { User } from "./RoomManager";
+import { User } from "./User";
 
 const wss = new WebSocketServer({ port: 3001 }, () =>
   console.log("websocket server started")

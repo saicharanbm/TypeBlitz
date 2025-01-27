@@ -1,36 +1,39 @@
-import { WebSocket } from "ws";
-
-export class User {
-  public id: string;
-  public roomId: string;
-  public name: string;
-  public isAdmin: boolean;
-  public ws: WebSocket;
-
-  constructor(ws: WebSocket) {
-    this.ws = ws;
-    this.isAdmin = false;
-    this.handleRequests();
+import { User } from "./User";
+export class RoomManager {
+  rooms: Map<string, User[]> = new Map<string, User[]>();
+  private static instance: RoomManager = new RoomManager();
+  private constructor() {}
+  static getInstance() {
+    if (!RoomManager.instance) {
+      RoomManager.instance = new RoomManager();
+    }
+    return RoomManager.instance;
   }
-
-  handleRequests() {
-    this.ws.on("message", (request) => {
-      const data = JSON.parse(request.toString());
-
-      switch (data.type) {
-        case "Join":
-          //do something
-          break;
-        case "Create":
-          //do something
-          break;
-      }
-    });
+  removeUserFromSpace(roomId: string, user: User) {
+    const users = this.rooms.get(roomId);
+    if (users) {
+      this.rooms.set(
+        roomId,
+        users.filter((u) => u.id !== user.id)
+      );
+    }
   }
-  destroy() {
-    // do some thing
+  addUserToSpace(roomId: string, user: User) {
+    const users = this.rooms.get(roomId);
+    if (users) {
+      this.rooms.set(roomId, [...users, user]);
+    } else {
+      this.rooms.set(roomId, [user]);
+    }
   }
-  sendMessage(message: any) {
-    this.ws.send(JSON.stringify(message));
+  broadcastMessage(roomId: string, message: any, user: User) {
+    const users = this.rooms.get(roomId);
+    if (users) {
+      users.forEach((u) => {
+        if (u.id !== user.id) {
+          u.sendMessage(message);
+        }
+      });
+    }
   }
 }
