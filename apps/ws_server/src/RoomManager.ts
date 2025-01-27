@@ -18,6 +18,16 @@ export class RoomManager {
       );
     }
   }
+  verifyIfRoomExist(roomId: string): boolean {
+    if (this.rooms.has(roomId)) return true;
+    return false;
+  }
+  verifyIfUserNameExistInTheRoom(roomId: string, userId: string): boolean {
+    const users = this.rooms.get(roomId);
+
+    return users ? users.some((user) => user.id === userId) : false;
+  }
+
   addUserToSpace(roomId: string, user: User) {
     const users = this.rooms.get(roomId);
     if (users) {
