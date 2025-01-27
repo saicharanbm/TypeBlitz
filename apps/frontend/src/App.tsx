@@ -92,7 +92,9 @@ function App() {
           setGameState((prev) => ({ ...prev, gameStatus: "finished" }));
         }
       }, 1000);
-      return () => clearInterval(timer);
+      return () => {
+        clearInterval(timer);
+      };
     }
   }, [gameState.gameStatus, gameState.timeLeft]);
 
