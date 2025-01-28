@@ -15,7 +15,7 @@ function Home() {
   );
 
   useEffect(() => {
-    const ws = new WebSocket("wss://localhost:3001");
+    const ws = new WebSocket("ws://localhost:3001");
 
     ws.onopen = () => {
       console.log("WebSocket connection established");

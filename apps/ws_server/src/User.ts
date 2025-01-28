@@ -3,8 +3,8 @@ import { v4 as uuid } from "uuid";
 import { RoomManager } from "./RoomManager";
 export class User {
   public id: string;
-  public roomId: string;
-  public name: string;
+  public roomId: string = "";
+  public name: string = "";
   public wordCount: number = 0;
   public isAdmin: boolean;
   public ws: WebSocket;
