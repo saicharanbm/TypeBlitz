@@ -10,6 +10,8 @@ export default {
         primaryColor: "var(--primaryColor)",
         correct: "var(--correct)",
         incorrect: "var(--incorrect)",
+        incorrectExtra: "var(--incorrect-extra)",
+        nav: "var(--nav)",
       },
       fontFamily: {
         robotoMono: ["Roboto Mono", "monospace"], // Custom font

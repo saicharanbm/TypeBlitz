@@ -13,7 +13,7 @@ function Icon() {
         width="200"
         height="100"
         rx="15"
-        fill="#e0e0e0"
+        fill="#e2b714"
         stroke="#333437"
         strokeWidth="4"
       />

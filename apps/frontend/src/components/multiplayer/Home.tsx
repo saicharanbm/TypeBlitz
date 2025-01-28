@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import { Users } from "lucide-react";
+
 function Home() {
   useEffect(() => {
     // Replace with your WebSocket server URL
@@ -30,7 +32,15 @@ function Home() {
     };
   }, []);
 
-  return <div className="text-center">Hello</div>;
+  return (
+    <div className="w-full pt-16 h-full flex justify-around ">
+      <div className="bg-[#2c2e31]">
+        <Users />
+        Join a Room
+      </div>
+      <div>Create Room</div>
+    </div>
+  );
 }
 
 export default Home;

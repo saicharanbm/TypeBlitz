@@ -5,12 +5,14 @@
 @tailwind utilities;
 
 :root {
-  --bgColor: #333;
-  --textPrimary: #fff;
-  --textSecondary: #666;
-  --primaryColor: #fd4;
-  --correct: #fff;
-  --incorrect: #f44;
+  --bgColor: #323437;
+  --textPrimary: #d1d0c5;
+  --textSecondary: #646669;
+  --primaryColor: #e2b714;
+  --correct: #d1d0c5;
+  --incorrect: #ca4754;
+  --incorrect-extra: #7e2a33;
+  --nav: #2c2e31;
 }
 body {
   font-family: "Roboto", sans-serif;
