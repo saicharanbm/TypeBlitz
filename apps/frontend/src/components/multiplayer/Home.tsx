@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Users, CodeXml } from "lucide-react";
-import JoinGroup from "./JoinGroup";
+import JoinGroup from "./JoinRoom";
 import { wsStatus } from "../../types";
 
 function Home() {

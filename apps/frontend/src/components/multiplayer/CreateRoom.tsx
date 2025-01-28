@@ -1,10 +1,6 @@
-import React, { useRef, useEffect, useState } from "react";
-
-interface PopupProps {
-  setIsPopupOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-function JoinGroup({ setIsPopupOpen }: PopupProps) {
+import { useRef, useEffect, useState } from "react";
+import { PopupProps } from "../../types";
+function CreateRoom({ setIsPopupOpen }: PopupProps) {
   const popupRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -17,8 +13,8 @@ function JoinGroup({ setIsPopupOpen }: PopupProps) {
         popupRef.current &&
         !popupRef.current.contains(event.target as Node)
       ) {
-        setIsVisible(false); // Start closing transition
-        setTimeout(() => setIsPopupOpen(false), 300); // Wait for transition before unmounting
+        setIsVisible(false);
+        setTimeout(() => setIsPopupOpen(false), 300);
       }
     };
 
@@ -43,24 +39,17 @@ function JoinGroup({ setIsPopupOpen }: PopupProps) {
       >
         <div>
           <input
-            type="number"
-            className="bg-nav w-[100%] leading-5 p-2 rounded-md outline-none caret-primaryColor "
-            placeholder="Room Code"
-          />
-        </div>
-        <div>
-          <input
             type="text"
             className="bg-nav w-[100%] leading-5 p-2 rounded-md outline-none caret-primaryColor "
             placeholder="Name"
           />
         </div>
         <div className="button text-center p-1 text-md font-robotoSans bg-nav rounded-md cursor-pointer hover:bg-textPrimary hover:text-nav transition-colors duration-[125ms]">
-          Join
+          Create
         </div>
       </div>
     </div>
   );
 }
 
-export default JoinGroup;
+export default CreateRoom;

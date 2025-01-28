@@ -26,3 +26,7 @@ export enum wsStatus {
   loading = "loading",
   error = "error",
 }
+
+export interface PopupProps {
+  setIsPopupOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}

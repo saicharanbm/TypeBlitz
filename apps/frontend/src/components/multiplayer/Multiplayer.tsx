@@ -1,41 +1,48 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Users, CodeXml } from "lucide-react";
-import Popup from "./JoinGroup";
+import JoinRoom from "./JoinRoom";
 import { wsStatus } from "../../types";
+
 function Multiplayer() {
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isJoinRoomOpen, setIsJoinRoomOpen] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<wsStatus>(
     wsStatus.loading
   );
+  const wsConnection = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:3001");
+    wsConnection.current = new WebSocket("ws://localhost:3001");
 
-    ws.onopen = () => {
+    wsConnection.current.onopen = () => {
       console.log("WebSocket connection established");
       setConnectionStatus(wsStatus.connected);
     };
 
-    ws.onmessage = (event) => {
+    wsConnection.current.onmessage = (event) => {
       console.log(event);
     };
 
-    ws.onerror = (error) => {
+    wsConnection.current.onerror = (error) => {
       console.error("WebSocket error:", error);
       setConnectionStatus(wsStatus.error);
     };
 
-    ws.onclose = () => {
+    wsConnection.current.onclose = () => {
       console.log("WebSocket connection closed");
-      if (connectionStatus !== "error") setConnectionStatus(wsStatus.error);
+      if (connectionStatus !== wsStatus.error)
+        setConnectionStatus(wsStatus.error);
     };
 
+    // Cleanup WebSocket on unmount
     return () => {
-      ws.close();
+      if (wsConnection.current) {
+        wsConnection.current.close();
+        wsConnection.current = null;
+      }
     };
-  }, [connectionStatus]);
+  }, []);
 
-  if (connectionStatus === "error") {
+  if (connectionStatus === wsStatus.error) {
     return (
       <div className="w-full p-28 flex flex-col items-center justify-center ">
         <p>
@@ -51,7 +58,7 @@ function Multiplayer() {
     );
   }
 
-  if (connectionStatus === "loading") {
+  if (connectionStatus === wsStatus.loading) {
     return (
       <div className="w-full p-28 flex flex-col items-center justify-center ">
         <p>Loading ...</p>
@@ -61,20 +68,26 @@ function Multiplayer() {
 
   return (
     <div className="w-full pt-16 flex gap-4 font-robotoMono">
-      <div className="bg-[#2c2e31] py-24 w-full flex flex-col items-center rounded-lg hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]">
+      <div
+        className="bg-[#2c2e31] py-24 w-full flex flex-col items-center rounded-lg hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]"
+        onClick={() => {
+          // Add room creation logic here
+          console.log("Create Room clicked");
+        }}
+      >
         <Users size={38} strokeWidth={3} />
         Create Room
       </div>
       <div
         className="bg-[#2c2e31] py-24 w-full flex flex-col items-center rounded-lg hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]"
         onClick={() => {
-          setIsPopupOpen(true);
+          setIsJoinRoomOpen(true);
         }}
       >
         <CodeXml size={38} strokeWidth={3} />
         Join a Room
       </div>
-      {isPopupOpen && <Popup setIsPopupOpen={setIsPopupOpen} />}
+      {isJoinRoomOpen && <JoinRoom setIsPopupOpen={setIsJoinRoomOpen} />}
     </div>
   );
 }
