@@ -17,5 +17,6 @@ export interface LetterInfo {
 export enum letterType {
   correct = "text-correct",
   incorrect = "text-incorrect",
+  extra = "text-incorrectExtra",
   normal = "",
 }
