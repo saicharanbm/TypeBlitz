@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { Users } from "lucide-react";
+import { Users, CodeXml, User, Users2, Users2Icon } from "lucide-react";
+import { PiUsersThreeFill } from "react-icons/pi";
 
 function Home() {
   useEffect(() => {
@@ -33,12 +34,16 @@ function Home() {
   }, []);
 
   return (
-    <div className="w-full pt-16 h-full flex justify-around ">
-      <div className="bg-[#2c2e31]">
-        <Users />
+    <div className="w-full pt-16  flex gap-4 ">
+      <div className="bg-[#2c2e31] py-24 w-full flex flex-col items-center  rounded-lg hover:bg-textPrimary cursor-pointer hover:text-nav">
+        {/* <PiUsersThreeFill /> */}
+        <Users size={38} strokeWidth={3} />
+        Create Room
+      </div>
+      <div className="bg-[#2c2e31] py-24 w-full flex flex-col items-center  rounded-lg hover:bg-textPrimary cursor-pointer hover:text-nav">
+        <CodeXml size={38} strokeWidth={3} />
         Join a Room
       </div>
-      <div>Create Room</div>
     </div>
   );
 }
