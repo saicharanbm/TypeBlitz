@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Users, CodeXml } from "lucide-react";
 import JoinRoom from "./JoinRoom";
 import CreateRoom from "./CreateRoom";
+import { HomeProps } from "../../types";
 
-function Home() {
+const Home = memo(({ setRoomId, wsConnection }: HomeProps) => {
   const [isJoinRoomOpen, setIsJoinRoomOpen] = useState(false);
   const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
 
@@ -27,10 +28,22 @@ function Home() {
         <CodeXml size={38} strokeWidth={3} />
         Join a Room
       </div>
-      {isJoinRoomOpen && <JoinRoom setIsPopupOpen={setIsJoinRoomOpen} />}
-      {isCreateRoomOpen && <CreateRoom setIsPopupOpen={setIsCreateRoomOpen} />}
+      {isJoinRoomOpen && (
+        <JoinRoom
+          setIsPopupOpen={setIsJoinRoomOpen}
+          setRoomId={setRoomId}
+          wsConnection={wsConnection}
+        />
+      )}
+      {isCreateRoomOpen && (
+        <CreateRoom
+          setIsPopupOpen={setIsCreateRoomOpen}
+          setRoomId={setRoomId}
+          wsConnection={wsConnection}
+        />
+      )}
     </div>
   );
-}
+});
 
 export default Home;

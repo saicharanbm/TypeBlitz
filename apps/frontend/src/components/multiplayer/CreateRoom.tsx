@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { PopupProps } from "../../types";
-function CreateRoom({ setIsPopupOpen }: PopupProps) {
+function CreateRoom({ setIsPopupOpen, setRoomId, wsConnection }: PopupProps) {
   const popupRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 

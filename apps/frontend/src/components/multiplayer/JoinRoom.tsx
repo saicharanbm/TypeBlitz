@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { PopupProps } from "../../types";
 
-function JoinRoom({ setIsPopupOpen }: PopupProps) {
+function JoinRoom({ setIsPopupOpen, setRoomId, wsConnection }: PopupProps) {
   const popupRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 

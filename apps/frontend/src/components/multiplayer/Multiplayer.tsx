@@ -85,7 +85,7 @@ function Multiplayer() {
     );
   }
   if (!roomId) {
-    return <Home />;
+    return <Home setRoomId={setRoomId} wsConnection={wsConnection.current} />;
   }
 }
 
