@@ -2,7 +2,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { GameState, letterType } from "../types";
 import { words } from "../utils/data";
 
-function Home() {
+function GameArea() {
   const GAME_TIME = useRef<number>(30); // Time in seconds
   const [gameState, setGameState] = useState<GameState>({
     words: [],
@@ -279,4 +279,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default GameArea;
