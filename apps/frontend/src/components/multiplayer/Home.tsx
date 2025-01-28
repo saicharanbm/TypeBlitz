@@ -1,8 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Users, CodeXml, User, Users2, Users2Icon } from "lucide-react";
 import { PiUsersThreeFill } from "react-icons/pi";
+import Popup from "./Popup";
 
 function Home() {
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   useEffect(() => {
     // Replace with your WebSocket server URL
     const ws = new WebSocket("wss://localhost:3001");
@@ -34,16 +36,22 @@ function Home() {
   }, []);
 
   return (
-    <div className="w-full pt-16  flex gap-4 ">
-      <div className="bg-[#2c2e31] py-24 w-full flex flex-col items-center  rounded-lg hover:bg-textPrimary cursor-pointer hover:text-nav">
+    <div className="w-full pt-16  flex gap-4 font-robotoMono">
+      <div className="bg-[#2c2e31] py-24 w-full flex flex-col items-center  rounded-lg hover:bg-textPrimary  cursor-pointer hover:text-nav transition-colors duration-[150ms]">
         {/* <PiUsersThreeFill /> */}
         <Users size={38} strokeWidth={3} />
         Create Room
       </div>
-      <div className="bg-[#2c2e31] py-24 w-full flex flex-col items-center  rounded-lg hover:bg-textPrimary cursor-pointer hover:text-nav">
+      <div
+        className="bg-[#2c2e31] py-24 w-full flex flex-col items-center  rounded-lg hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]"
+        onClick={() => {
+          setIsPopupOpen(true);
+        }}
+      >
         <CodeXml size={38} strokeWidth={3} />
         Join a Room
       </div>
+      {isPopupOpen && <Popup setIsPopupOpen={setIsPopupOpen} />}
     </div>
   );
 }
