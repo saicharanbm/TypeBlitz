@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Users, CodeXml } from "lucide-react";
-import Popup from "./Popup";
+import Popup from "./JoinGroup";
 import { wsStatus } from "../../types";
 function Multiplayer() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);

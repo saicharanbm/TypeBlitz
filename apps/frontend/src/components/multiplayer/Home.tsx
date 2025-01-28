@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Users, CodeXml } from "lucide-react";
-import Popup from "./Popup";
+import JoinGroup from "./JoinGroup";
 import { wsStatus } from "../../types";
 
 function Home() {
@@ -75,7 +75,7 @@ function Home() {
         <CodeXml size={38} strokeWidth={3} />
         Join a Room
       </div>
-      {isPopupOpen && <Popup setIsPopupOpen={setIsPopupOpen} />}
+      {isPopupOpen && <JoinGroup setIsPopupOpen={setIsPopupOpen} />}
     </div>
   );
 }

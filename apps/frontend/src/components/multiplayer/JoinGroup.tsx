@@ -4,7 +4,7 @@ interface PopupProps {
   setIsPopupOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-function Popup({ setIsPopupOpen }: PopupProps) {
+function JoinGroup({ setIsPopupOpen }: PopupProps) {
   const popupRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -63,4 +63,4 @@ function Popup({ setIsPopupOpen }: PopupProps) {
   );
 }
 
-export default Popup;
+export default JoinGroup;
