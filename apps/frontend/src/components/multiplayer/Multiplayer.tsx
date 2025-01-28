@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { Users, CodeXml } from "lucide-react";
 import Popup from "./Popup";
 import { wsStatus } from "../../types";
-
-function Home() {
+function Multiplayer() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<wsStatus>(
     wsStatus.loading
@@ -80,4 +79,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Multiplayer;

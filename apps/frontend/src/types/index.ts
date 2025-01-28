@@ -20,3 +20,9 @@ export enum letterType {
   extra = "text-incorrectExtra",
   normal = "",
 }
+
+export enum wsStatus {
+  connected = "connected",
+  loading = "loading",
+  error = "error",
+}
