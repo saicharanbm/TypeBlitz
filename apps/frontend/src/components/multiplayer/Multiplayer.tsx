@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import { Users, CodeXml } from "lucide-react";
-import JoinRoom from "./JoinRoom";
+import Home from "./Home";
+// import JoinRoom from "./JoinRoom";
+import { Link } from "react-router-dom";
 import { wsStatus } from "../../types";
 
 function Multiplayer() {
-  const [isJoinRoomOpen, setIsJoinRoomOpen] = useState(false);
+  //   const [isJoinRoomOpen, setIsJoinRoomOpen] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<wsStatus>(
     wsStatus.loading
   );
+  const [reloadCount, setReloadCount] = useState(0);
   const wsConnection = useRef<WebSocket | null>(null);
+  const [roomId, setRoomId] = useState("");
 
   useEffect(() => {
     wsConnection.current = new WebSocket("ws://localhost:3001");
@@ -40,20 +43,36 @@ function Multiplayer() {
         wsConnection.current = null;
       }
     };
-  }, []);
+  }, [reloadCount]);
 
   if (connectionStatus === wsStatus.error) {
     return (
       <div className="w-full p-28 flex flex-col items-center justify-center ">
-        <p>
-          Failed to connect to the WebSocket server. Please try again later.
-        </p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-4 px-4 py-2 bg-nav rounded-lg  hover:bg-textPrimary hover:text-nav transition"
-        >
-          Reload Page
-        </button>
+        {reloadCount < 4 ? (
+          <>
+            <p>
+              Failed to connect to the WebSocket server. Please try again later.
+            </p>
+            <button
+              onClick={() => setReloadCount((prev) => prev + 1)}
+              className="mt-4 px-4 py-2 bg-nav rounded-lg  hover:bg-textPrimary hover:text-nav transition"
+            >
+              Reload Page
+            </button>
+          </>
+        ) : (
+          <>
+            <p className="text-incorrect">
+              Something went wrong please try again after some time.
+            </p>
+            <Link
+              className="mt-4 px-4 py-2 bg-nav rounded-lg  hover:bg-textPrimary hover:text-nav transition"
+              to={"/"}
+            >
+              Home
+            </Link>
+          </>
+        )}
       </div>
     );
   }
@@ -65,31 +84,9 @@ function Multiplayer() {
       </div>
     );
   }
-
-  return (
-    <div className="w-full pt-16 flex gap-4 font-robotoMono">
-      <div
-        className="bg-[#2c2e31] py-24 w-full flex flex-col items-center rounded-lg hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]"
-        onClick={() => {
-          // Add room creation logic here
-          console.log("Create Room clicked");
-        }}
-      >
-        <Users size={38} strokeWidth={3} />
-        Create Room
-      </div>
-      <div
-        className="bg-[#2c2e31] py-24 w-full flex flex-col items-center rounded-lg hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]"
-        onClick={() => {
-          setIsJoinRoomOpen(true);
-        }}
-      >
-        <CodeXml size={38} strokeWidth={3} />
-        Join a Room
-      </div>
-      {isJoinRoomOpen && <JoinRoom setIsPopupOpen={setIsJoinRoomOpen} />}
-    </div>
-  );
+  if (!roomId) {
+    return <Home />;
+  }
 }
 
 export default Multiplayer;
