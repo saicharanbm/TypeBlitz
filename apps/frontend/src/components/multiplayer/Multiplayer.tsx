@@ -3,6 +3,7 @@ import Home from "./Home";
 // import JoinRoom from "./JoinRoom";
 import { Link } from "react-router-dom";
 import { wsStatus } from "../../types";
+import { v4 as uuid } from "uuid";
 
 function Multiplayer() {
   //   const [isJoinRoomOpen, setIsJoinRoomOpen] = useState(false);
@@ -12,25 +13,35 @@ function Multiplayer() {
   const [reloadCount, setReloadCount] = useState(0);
   const wsConnection = useRef<WebSocket | null>(null);
   const [roomId, setRoomId] = useState("");
+  const userId = useRef(uuid());
 
   useEffect(() => {
     wsConnection.current = new WebSocket("ws://localhost:3001");
+    const ws = wsConnection.current;
 
-    wsConnection.current.onopen = () => {
+    ws.onopen = () => {
       console.log("WebSocket connection established");
       setConnectionStatus(wsStatus.connected);
+      ws.send(
+        JSON.stringify({
+          type: "connect",
+          payload: {
+            userId: userId.current,
+          },
+        })
+      );
     };
 
-    wsConnection.current.onmessage = (event) => {
+    ws.onmessage = (event) => {
       console.log(event);
     };
 
-    wsConnection.current.onerror = (error) => {
+    ws.onerror = (error) => {
       console.error("WebSocket error:", error);
       setConnectionStatus(wsStatus.error);
     };
 
-    wsConnection.current.onclose = () => {
+    ws.onclose = () => {
       console.log("WebSocket connection closed");
       if (connectionStatus !== wsStatus.error)
         setConnectionStatus(wsStatus.error);

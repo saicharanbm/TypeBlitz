@@ -200,3 +200,5 @@ export const words = [
   "help",
   "line",
 ];
+
+export const roomIdString = "1234567890qwertyuiopasdfghjklzxcvbnm";

@@ -54,7 +54,7 @@ export class User {
         }
         case "Create": {
           //do something
-          const { roomId, name } = data.payload;
+          const { userId, name } = data.payload;
 
           // check if the Room is already present
           const RoomManagerInstance = RoomManager.getInstance();
