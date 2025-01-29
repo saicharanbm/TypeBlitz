@@ -291,7 +291,7 @@ function GameArea() {
 
         <div
           ref={gameRef}
-          className={`game-area h-[108px] overflow-hidden leading-9 focus:outline-none font-robotoMono ${
+          className={`game-area h-[144px] overflow-hidden leading-[3rem] focus:outline-none font-robotoMono  text-2xl tracking-wide ${
             gameState.gameStatus === "finished" ? "opacity-40" : ""
           }`}
           tabIndex={0}

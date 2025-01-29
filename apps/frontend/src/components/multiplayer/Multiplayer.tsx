@@ -33,7 +33,8 @@ function Multiplayer() {
     };
 
     ws.onmessage = (response) => {
-      console.log(typeof response.data);
+      const data = JSON.parse(response.data);
+      console.log(data);
     };
 
     ws.onerror = (error) => {

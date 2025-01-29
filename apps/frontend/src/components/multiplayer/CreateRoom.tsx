@@ -31,6 +31,7 @@ function CreateRoom({ setIsPopupOpen, userId, wsConnection }: PopupProps) {
   function createRoom() {
     if (!name.trim()) {
       setError("name can't be empty.");
+      return;
     }
     wsConnection.send(
       JSON.stringify({
