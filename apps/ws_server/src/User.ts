@@ -47,6 +47,7 @@ export class User {
 
           //check if the user is already present
           if (RoomManagerInstance.checkIfUserExistInTheRoom(roomId, userId)) {
+            this.sendMessage({ type: "user-already-in-the-room" });
             return;
           }
           this.id = userId;
@@ -60,6 +61,18 @@ export class User {
               roomId: this.roomId,
               name: this.displayName,
               userId: this.id,
+              isAdmin: this.isAdmin,
+            },
+          });
+          //send the list of exesting users
+          const userList = RoomManagerInstance.getAllUsers(
+            this.roomId,
+            this.id
+          );
+          this.sendMessage({
+            type: "user-list",
+            payload: {
+              users: userList,
             },
           });
 
@@ -71,6 +84,7 @@ export class User {
               payload: {
                 name: this.displayName,
                 useId: this.id,
+                isAdmin: this.isAdmin,
               },
             },
             this.id
@@ -88,14 +102,15 @@ export class User {
           const RoomManagerInstance = RoomManager.getInstance();
 
           // this.roomId = generateRoomId();
-
           this.roomId = RoomManagerInstance.createRoom(this);
+
           this.sendMessage({
             type: "room-created",
             payload: {
               roomId: this.roomId,
               name: this.displayName,
               userId: this.id,
+              isAdmin: this.isAdmin,
             },
           });
           break;

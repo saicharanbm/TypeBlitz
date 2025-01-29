@@ -33,6 +33,18 @@ export class RoomManager {
     return data?.users ? data.users.some((user) => user.id === userId) : false;
   }
 
+  getAllUsers(roomId: string, userId: string) {
+    const users = this.rooms.get(roomId)?.users;
+    const usersList = users
+      ?.filter((user) => user.id !== userId)
+      ?.map((user) => ({
+        userId: user.id,
+        name: user.displayName,
+        isAdmin: user.isAdmin,
+      }));
+    return usersList ?? [];
+  }
+
   addUserToRoom(roomId: string, user: User) {
     const data = this.rooms.get(roomId);
     const users = data?.users;
