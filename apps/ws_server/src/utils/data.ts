@@ -201,4 +201,5 @@ export const words = [
   "line",
 ];
 
-export const roomIdString = "1234567890qwertyuiopasdfghjklzxcvbnm";
+export const roomIdString =
+  "1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";

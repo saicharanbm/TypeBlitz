@@ -36,8 +36,14 @@ export class RoomManager {
   addUserToRoom(roomId: string, user: User) {
     const data = this.rooms.get(roomId);
     const users = data?.users;
+    let name = user.name;
     if (users) {
       this.rooms.set(roomId, { users: [...users, user], words: data.words });
+      //get the count of users with same name in the room
+      const count = this.rooms.get(roomId)?.users.reduce((acc, user) => {
+        return user.name === name ? acc + 1 : acc;
+      }, 0);
+      name = count && count > 1 ? `${name} (${count})` : name;
     } else {
       //generate words
       const words = Array.from({ length: 200 }, (_, id) => {
@@ -47,6 +53,7 @@ export class RoomManager {
 
       this.rooms.set(roomId, { users: [user], words });
     }
+    return name;
   }
   broadcastMessage(roomId: string, message: any, userId: string) {
     const data = this.rooms.get(roomId);
