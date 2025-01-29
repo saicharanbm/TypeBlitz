@@ -29,11 +29,11 @@ export enum wsStatus {
 
 export interface PopupProps {
   setIsPopupOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setRoomId: React.Dispatch<React.SetStateAction<string>>;
+  userId: string;
   wsConnection: WebSocket;
 }
 
 export interface HomeProps {
-  setRoomId: React.Dispatch<React.SetStateAction<string>>;
+  userId: string;
   wsConnection: WebSocket;
 }

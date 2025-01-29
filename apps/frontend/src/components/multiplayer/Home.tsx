@@ -4,7 +4,7 @@ import JoinRoom from "./JoinRoom";
 import CreateRoom from "./CreateRoom";
 import { HomeProps } from "../../types";
 
-const Home = memo(({ setRoomId, wsConnection }: HomeProps) => {
+const Home = memo(({ userId, wsConnection }: HomeProps) => {
   const [isJoinRoomOpen, setIsJoinRoomOpen] = useState(false);
   const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
 
@@ -31,14 +31,14 @@ const Home = memo(({ setRoomId, wsConnection }: HomeProps) => {
       {isJoinRoomOpen && (
         <JoinRoom
           setIsPopupOpen={setIsJoinRoomOpen}
-          setRoomId={setRoomId}
+          userId={userId}
           wsConnection={wsConnection}
         />
       )}
       {isCreateRoomOpen && (
         <CreateRoom
           setIsPopupOpen={setIsCreateRoomOpen}
-          setRoomId={setRoomId}
+          userId={userId}
           wsConnection={wsConnection}
         />
       )}

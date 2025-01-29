@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { v4 as uuid } from "uuid";
+// import { v4 as uuid } from "uuid";
 import { RoomManager } from "./RoomManager";
 import { generateRoomId } from "./utils";
 export class User {
@@ -65,6 +65,7 @@ export class User {
           break;
         }
         case "Create": {
+          console.log("Create request");
           //do something
           const { userId, name } = data.payload;
           this.id = userId;

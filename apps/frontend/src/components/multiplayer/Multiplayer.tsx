@@ -32,8 +32,8 @@ function Multiplayer() {
       );
     };
 
-    ws.onmessage = (event) => {
-      console.log(event);
+    ws.onmessage = (response) => {
+      console.log(typeof response.data);
     };
 
     ws.onerror = (error) => {
@@ -95,8 +95,8 @@ function Multiplayer() {
       </div>
     );
   }
-  if (!roomId) {
-    return <Home setRoomId={setRoomId} wsConnection={wsConnection.current} />;
+  if (!roomId && wsConnection.current) {
+    return <Home userId={userId.current} wsConnection={wsConnection.current} />;
   }
 }
 

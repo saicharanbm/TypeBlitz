@@ -1,8 +1,11 @@
 import { useRef, useEffect, useState } from "react";
 import { PopupProps } from "../../types";
-function CreateRoom({ setIsPopupOpen, setRoomId, wsConnection }: PopupProps) {
+import { Space } from "lucide-react";
+function CreateRoom({ setIsPopupOpen, userId, wsConnection }: PopupProps) {
   const popupRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     // Trigger the transition on mount
@@ -25,6 +28,18 @@ function CreateRoom({ setIsPopupOpen, setRoomId, wsConnection }: PopupProps) {
     };
   }, [setIsPopupOpen]);
 
+  function createRoom() {
+    if (!name.trim()) {
+      setError("name can't be empty.");
+    }
+    wsConnection.send(
+      JSON.stringify({
+        type: "Create",
+        payload: { name, userId: userId },
+      })
+    );
+  }
+
   return (
     <div
       className={`fixed left-0 top-0 w-full h-full bg-[rgba(0,0,0,0.75)] flex items-center justify-center z-50 ${
@@ -42,9 +57,19 @@ function CreateRoom({ setIsPopupOpen, setRoomId, wsConnection }: PopupProps) {
             type="text"
             className="bg-nav w-[100%] leading-5 p-2 rounded-md outline-none caret-primaryColor "
             placeholder="Name"
+            onChange={(e) => {
+              if (error) setError("");
+              setName(e.target.value);
+            }}
+            value={name}
+            maxLength={8}
           />
         </div>
-        <div className="button text-center p-1 text-md font-robotoSans bg-nav rounded-md cursor-pointer hover:bg-textPrimary hover:text-nav transition-colors duration-[125ms]">
+        {error && <span className="text-incorrect text-sm">{error}</span>}
+        <div
+          className="button text-center p-1 text-md font-robotoSans bg-nav rounded-md cursor-pointer hover:bg-textPrimary hover:text-nav transition-colors duration-[125ms]"
+          onClick={createRoom}
+        >
           Create
         </div>
       </div>
