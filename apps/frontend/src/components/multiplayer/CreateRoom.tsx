@@ -1,8 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { PopupProps } from "../../types";
-import { Space } from "lucide-react";
 function CreateRoom({ setIsPopupOpen, userId, wsConnection }: PopupProps) {
-  const popupRef = useRef<HTMLDivElement>(null);
+  const popupRef = useRef<HTMLFormElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [name, setName] = useState("");
   const [error, setError] = useState("");
@@ -47,11 +46,15 @@ function CreateRoom({ setIsPopupOpen, userId, wsConnection }: PopupProps) {
         isVisible ? "opacity-100" : "opacity-0"
       } transition-opacity duration-300`}
     >
-      <div
+      <form
         ref={popupRef}
         className={`main bg-bgColor rounded-lg p-8 grid gap-4 w-64 md:w-72 lg:w-80 transform ${
           isVisible ? "scale-100" : "scale-95"
         } transition-transform duration-300`}
+        onSubmit={(e) => {
+          e.preventDefault();
+          createRoom();
+        }}
       >
         <div>
           <input
@@ -66,14 +69,16 @@ function CreateRoom({ setIsPopupOpen, userId, wsConnection }: PopupProps) {
             maxLength={8}
           />
         </div>
-        {error && <span className="text-incorrect text-sm">{error}</span>}
-        <div
+        <div className="w-full overflow-hidden text-center leading-4">
+          {error && <span className="text-incorrect text-sm">{error}</span>}
+        </div>
+        <button
           className="button text-center p-1 text-md font-robotoSans bg-nav rounded-md cursor-pointer hover:bg-textPrimary hover:text-nav transition-colors duration-[125ms]"
-          onClick={createRoom}
+          type="submit"
         >
           Create
-        </div>
-      </div>
+        </button>
+      </form>
     </div>
   );
 }

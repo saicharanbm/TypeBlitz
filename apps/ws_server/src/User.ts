@@ -25,7 +25,14 @@ export class User {
       switch (data.type) {
         case "Join": {
           //do something
-          const { roomId, name } = data.payload;
+          const { roomId, name, userId } = data.payload;
+          if (!roomId.trim() || !name.trim() || !userId.trim()) {
+            this.sendMessage({
+              type: "invalid-request",
+              payload: { message: "Please provide all the details." },
+            });
+            return;
+          }
           const RoomManagerInstance = RoomManager.getInstance();
           if (!RoomManagerInstance.verifyIfRoomExist(roomId)) {
             this.sendMessage({ type: "room-doesnott-exist" });
@@ -37,6 +44,12 @@ export class User {
           //   this.sendMessage({ type: "name-already-exist" });
           //   return;
           // }
+
+          //check if the user is already present
+          if (RoomManagerInstance.checkIfUserExistInTheRoom(roomId, userId)) {
+            return;
+          }
+          this.id = userId;
           this.roomId = roomId;
           this.name = name;
           this.displayName = RoomManagerInstance.addUserToRoom(roomId, this);
@@ -71,15 +84,12 @@ export class User {
           this.id = userId;
           this.name = name;
           this.isAdmin = true;
-
+          this.displayName = name;
           const RoomManagerInstance = RoomManager.getInstance();
 
-          this.roomId = generateRoomId();
+          // this.roomId = generateRoomId();
 
-          this.displayName = RoomManagerInstance.addUserToRoom(
-            this.roomId,
-            this
-          );
+          this.roomId = RoomManagerInstance.createRoom(this);
           this.sendMessage({
             type: "room-created",
             payload: {

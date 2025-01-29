@@ -34,6 +34,12 @@ function Multiplayer() {
 
     ws.onmessage = (response) => {
       const data = JSON.parse(response.data);
+      if (data.type === "room-created") {
+        const { roomId } = data.payload;
+        // if (roomId) {
+        //   setRoomId(roomId);
+        // }
+      }
       console.log(data);
     };
 
@@ -98,6 +104,9 @@ function Multiplayer() {
   }
   if (!roomId && wsConnection.current) {
     return <Home userId={userId.current} wsConnection={wsConnection.current} />;
+  }
+  if (roomId) {
+    return <div>Room : {roomId}</div>;
   }
 }
 
