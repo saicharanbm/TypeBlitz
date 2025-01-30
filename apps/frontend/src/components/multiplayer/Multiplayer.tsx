@@ -56,6 +56,20 @@ function Multiplayer() {
         if (roomId) {
           setRoomId(roomId);
         }
+        return;
+      }
+
+      if (data.type === "room-doesnot-exist") {
+        const { roomId } = data.payload;
+        if (!roomId) {
+          toast.dismiss();
+          toast.error(`Something went wrong.`, ToastStlye);
+          return;
+        }
+        toast.dismiss();
+        toast.success(`There is no room with the id ${roomId}`, ToastStlye);
+
+        return;
       }
       console.log(data);
     };

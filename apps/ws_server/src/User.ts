@@ -35,7 +35,10 @@ export class User {
           }
           const RoomManagerInstance = RoomManager.getInstance();
           if (!RoomManagerInstance.verifyIfRoomExist(roomId)) {
-            this.sendMessage({ type: "room-doesnott-exist" });
+            this.sendMessage({
+              type: "room-doesnot-exist",
+              payload: { roomId },
+            });
             return;
           }
           // if (

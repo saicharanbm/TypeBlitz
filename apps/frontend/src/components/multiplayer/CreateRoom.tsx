@@ -7,6 +7,16 @@ function CreateRoom({ setIsPopupOpen, userId, wsConnection }: PopupProps) {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    //Set focus on input box
+    if (popupRef.current) {
+      const inputElement = popupRef.current.querySelector("input");
+      if (inputElement) {
+        (inputElement as HTMLInputElement).focus(); // Focus the input field
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     // Trigger the transition on mount
     setIsVisible(true);
 

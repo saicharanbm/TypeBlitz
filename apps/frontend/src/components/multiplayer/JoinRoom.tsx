@@ -9,6 +9,16 @@ function JoinRoom({ setIsPopupOpen, userId, wsConnection }: PopupProps) {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    //Set focus on input box
+    if (popupRef.current) {
+      const inputElement = popupRef.current.querySelector("input");
+      if (inputElement) {
+        (inputElement as HTMLInputElement).focus(); // Focus the input field
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     // Trigger the transition on mount
     setIsVisible(true);
 
@@ -75,7 +85,10 @@ function JoinRoom({ setIsPopupOpen, userId, wsConnection }: PopupProps) {
             placeholder="Room Code"
             maxLength={6}
             value={roomId}
-            onChange={(e) => setRoomId(e.target.value)}
+            onChange={(e) => {
+              if (error) setError("");
+              setRoomId(e.target.value);
+            }}
           />
         </div>
         <div>
@@ -85,7 +98,10 @@ function JoinRoom({ setIsPopupOpen, userId, wsConnection }: PopupProps) {
             placeholder="Name"
             value={name}
             maxLength={8}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              if (error) setError("");
+              setName(e.target.value);
+            }}
           />
         </div>
         <div className="w-full overflow-hidden text-center leading-4">

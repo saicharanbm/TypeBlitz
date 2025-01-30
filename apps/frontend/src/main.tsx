@@ -27,7 +27,6 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ToastContainer
-      className={"bg-bgColor text-textPrimary"}
       position="top-right"
       autoClose={4000}
       hideProgressBar={true}
