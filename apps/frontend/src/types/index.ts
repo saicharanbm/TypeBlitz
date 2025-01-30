@@ -40,9 +40,15 @@ export type HomeProps = {
 export type roomDetailsType = {
   roomId: string;
   users: Users[];
+  messages: Message[];
 };
 export type Users = {
   userId: string;
   name: string;
   isAdmin: boolean;
+};
+export type Message = {
+  name: string;
+  id: string;
+  message: string;
 };

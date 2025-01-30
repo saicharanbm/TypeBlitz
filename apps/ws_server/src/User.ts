@@ -41,12 +41,6 @@ export class User {
             });
             return;
           }
-          // if (
-          //   !RoomManagerInstance.verifyIfUserNameExistInTheRoom(roomId, name)
-          // ) {
-          //   this.sendMessage({ type: "name-already-exist" });
-          //   return;
-          // }
 
           //check if the user is already present
           if (RoomManagerInstance.checkIfUserExistInTheRoom(roomId, userId)) {
@@ -98,6 +92,13 @@ export class User {
           console.log("Create request");
           //do something
           const { userId, name } = data.payload;
+          if (!userId.trim() || !name.trim()) {
+            this.sendMessage({
+              type: "invalid-request",
+              payload: { message: "Please provide all the details." },
+            });
+            return;
+          }
           this.id = userId;
           this.name = name;
           this.isAdmin = true;
@@ -118,15 +119,6 @@ export class User {
           });
           break;
         }
-
-        // case "VerifyIfUserNameExistInTheRoom":
-        //   //do something
-        //   const { roomId, name } = data.payload;
-
-        //   RoomManager.getInstance().verifyIfUserNameExistInTheRoom(roomId, name)
-        //     ? this.sendMessage({ type: "name-already-exist" })
-        //     : this.sendMessage({ type: "name-doesnot-exist" });
-        //   break;
       }
     });
   }
