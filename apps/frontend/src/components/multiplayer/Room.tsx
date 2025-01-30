@@ -27,16 +27,27 @@ function Room() {
       </div>
       <div className="w-full grid grid-cols-[70%_30%] gap-4 py-6">
         <div className="chat-container ">
-          <h3 className="text-textSecondary">chat</h3>
+          <p className="text-textSecondary">chat</p>
+          <div className="w-full h-96 "></div>
+          <input
+            type="text"
+            className="w-full bg-nav rounded-md outline-none p-2 px-4 caret-primaryColor"
+            placeholder="Hit enter to send message"
+          />
         </div>
-        <div className="p-2 flex flex-col gap-4 text-textPrimary">
-          <div className="w-full p-3 flex items-center gap-2 justify-center bg-nav rounded-md hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]">
-            <Keyboard />
-            <h3>Start test</h3>
+        <div className="p-2 flex flex-col gap-6 text-textPrimary">
+          <div className="flex flex-col gap-4">
+            <div className="w-full p-3 flex items-center gap-2 justify-center bg-nav rounded-md hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]">
+              <Keyboard />
+              <h3>Start test</h3>
+            </div>
+            <div className="w-full p-2 flex items-center gap-2 justify-center bg-nav rounded-md hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]">
+              <DoorOpen />
+              <h3>Leave room</h3>
+            </div>
           </div>
-          <div className="w-full p-2 flex items-center gap-2 justify-center bg-nav rounded-md hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]">
-            <DoorOpen />
-            <h3>Leave room</h3>
+          <div>
+            <p className="text-textSecondary">Users</p>
           </div>
         </div>
       </div>
