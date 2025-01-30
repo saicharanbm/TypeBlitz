@@ -5,6 +5,7 @@ import { roomDetailsType, wsStatus } from "../../types";
 import { v4 as uuid } from "uuid";
 import { toast } from "react-toastify";
 import { ToastStlye } from "../../utils";
+import Room from "./Room";
 
 function Multiplayer() {
   const [connectionStatus, setConnectionStatus] = useState<wsStatus>(
@@ -16,8 +17,6 @@ function Multiplayer() {
   const userId = useRef(uuid());
 
   useEffect(() => {
-    let reconnectTimeout: number | null = null;
-
     const connectWebSocket = () => {
       wsConnection.current = new WebSocket("ws://localhost:3001");
       const ws = wsConnection.current;
@@ -41,7 +40,7 @@ function Multiplayer() {
           switch (data.type) {
             case "room-created":
             case "room-joined":
-              handleRoomUpdate(data.payload);
+              handleFirstUser(data.payload);
               break;
 
             case "room-doesnot-exist":
@@ -75,19 +74,10 @@ function Multiplayer() {
         console.log("WebSocket closed");
         if (connectionStatus !== wsStatus.error)
           setConnectionStatus(wsStatus.error);
-        wsConnection.current = null;
         setRoomDetails(undefined);
         userId.current = uuid();
 
         // Retry connection with exponential backoff
-        if (reloadCount < 4) {
-          reconnectTimeout = setTimeout(
-            () => {
-              setReloadCount((prev) => prev + 1);
-            },
-            2000 * (reloadCount + 1)
-          ); // 2s, 4s, 6s...
-        }
       };
     };
 
@@ -97,15 +87,14 @@ function Multiplayer() {
       if (wsConnection.current) {
         wsConnection.current.close();
       }
-      if (reconnectTimeout) {
-        clearTimeout(reconnectTimeout);
-      }
     };
   }, [reloadCount]);
 
-  const handleRoomUpdate = (payload: any) => {
+  const handleFirstUser = (payload: any) => {
     const { roomId, name, userId, isAdmin } = payload;
-    if (!roomId || !name || !userId || !isAdmin) {
+    console.log(roomId, name, userId, isAdmin);
+    if (!roomId || !name || !userId || typeof isAdmin !== "boolean") {
+      console.log("error");
       showToastError("Something went wrong while creating the room.");
       return;
     }
@@ -163,7 +152,7 @@ function Multiplayer() {
   }
 
   return roomDetails?.roomId ? (
-    <div>Room details: {JSON.stringify(roomDetails)}</div>
+    <Room />
   ) : (
     wsConnection.current && (
       <Home userId={userId.current} wsConnection={wsConnection.current} />
