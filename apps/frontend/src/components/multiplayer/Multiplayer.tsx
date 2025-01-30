@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import Home from "./Home";
 // import JoinRoom from "./JoinRoom";
 import { Link } from "react-router-dom";
-import { wsStatus } from "../../types";
+import { roomDetailsType, wsStatus } from "../../types";
 import { v4 as uuid } from "uuid";
+import { toast } from "react-toastify";
+import { ToastStlye } from "../../utils";
 
 function Multiplayer() {
   //   const [isJoinRoomOpen, setIsJoinRoomOpen] = useState(false);
@@ -12,6 +14,7 @@ function Multiplayer() {
   );
   const [reloadCount, setReloadCount] = useState(0);
   const wsConnection = useRef<WebSocket | null>(null);
+  const [roomDetails, setRoomDetails] = useState<roomDetailsType>();
   const [roomId, setRoomId] = useState("");
   const userId = useRef(uuid());
 
@@ -35,10 +38,24 @@ function Multiplayer() {
     ws.onmessage = (response) => {
       const data = JSON.parse(response.data);
       if (data.type === "room-created") {
-        const { roomId } = data.payload;
-        // if (roomId) {
-        //   setRoomId(roomId);
-        // }
+        const { roomId, name, userId, isAdmin } = data.payload;
+        if (!roomId || !name || !userId || !isAdmin) {
+          toast.dismiss();
+          toast.error(
+            "Something Went wrong while creating the room.",
+            ToastStlye
+          );
+          return;
+        }
+        toast.dismiss();
+        toast.success(
+          `Room with id ${roomId} successfully created.`,
+          ToastStlye
+        );
+
+        if (roomId) {
+          setRoomId(roomId);
+        }
       }
       console.log(data);
     };

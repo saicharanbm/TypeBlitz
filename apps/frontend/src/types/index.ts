@@ -27,13 +27,22 @@ export enum wsStatus {
   error = "error",
 }
 
-export interface PopupProps {
+export type PopupProps = {
   setIsPopupOpen: React.Dispatch<React.SetStateAction<boolean>>;
   userId: string;
   wsConnection: WebSocket;
-}
+};
 
-export interface HomeProps {
+export type HomeProps = {
   userId: string;
   wsConnection: WebSocket;
-}
+};
+export type roomDetailsType = {
+  roomId: string;
+  users: Users[];
+};
+export type Users = {
+  userId: string;
+  name: string;
+  isAdmin: boolean;
+};
