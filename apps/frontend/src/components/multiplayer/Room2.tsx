@@ -1,0 +1,154 @@
+import { Keyboard, DoorOpen } from "lucide-react";
+import {
+  messageType,
+  roomDetailsType,
+  totalTime,
+  wordDifficulty,
+} from "../../types";
+
+type RoomProps = {
+  roomDetails: roomDetailsType;
+  userId: string;
+};
+
+function Room({ roomDetails, userId }: RoomProps) {
+  return (
+    <div className="w-full">
+      <div className="nav w-full flex items-center justify-center pb-4 pt-2 ">
+        <div className="flex rounded-lg bg-nav py-1 px-2 text-textSecondary font-robotoMono text-lg   ">
+          <div
+            className={`px-2 cursor-pointer   ${roomDetails.difficulty === wordDifficulty.easy ? "text-primaryColor" : "hover:text-textPrimary"}`}
+            onClick={() => {
+              // changeDifficulty(wordDifficulty.easy);
+            }}
+          >
+            <span>Easy</span>
+          </div>
+          <div className="spacer w-1 my-1 rounded-md bg-bgColor"></div>
+
+          <div
+            className={`px-2 cursor-pointer   ${roomDetails.difficulty === wordDifficulty.medium ? "text-primaryColor" : "hover:text-textPrimary"}`}
+            onClick={() => {
+              // changeDifficulty(wordDifficulty.medium);
+            }}
+          >
+            <span>Medium</span>
+          </div>
+          <div className="spacer w-1 my-1 rounded-md bg-bgColor"></div>
+
+          <div
+            className={`px-2 cursor-pointer   ${roomDetails.difficulty === wordDifficulty.hard ? "text-primaryColor" : "hover:text-textPrimary"}`}
+            onClick={() => {
+              // changeDifficulty(wordDifficulty.hard);
+            }}
+          >
+            <span>Hard</span>
+          </div>
+          <div
+            className={`px-2 cursor-pointer   ${roomDetails.time === totalTime.fifteen ? "text-primaryColor" : "hover:text-textPrimary"}`}
+            onClick={() => {
+              // changeTime(15);
+            }}
+          >
+            <span>15</span>
+          </div>
+          <div className="spacer w-1 my-1 rounded-md bg-bgColor"></div>
+
+          <div
+            className={`px-2 cursor-pointer   ${roomDetails.time === totalTime.thirty ? "text-primaryColor" : "hover:text-textPrimary"}`}
+            onClick={() => {
+              // changeTime(30);
+            }}
+          >
+            <span>30</span>
+          </div>
+          <div className="spacer w-1 my-1 rounded-md bg-bgColor"></div>
+
+          <div
+            className={`px-2 cursor-pointer   ${roomDetails.time === totalTime.sixty ? "text-primaryColor" : "hover:text-textPrimary"}`}
+            onClick={() => {
+              // changeTime(60);
+            }}
+          >
+            <span>60</span>
+          </div>
+          <div className="spacer w-1 my-1 rounded-md bg-bgColor"></div>
+
+          <div
+            className={`px-2 cursor-pointer   ${roomDetails.time === totalTime.onetwenty ? "text-primaryColor" : "hover:text-textPrimary"}`}
+            onClick={() => {
+              // changeTime(120);
+            }}
+          >
+            <span>120</span>
+          </div>
+        </div>
+      </div>
+      <div className="w-full grid grid-cols-[70%_30%] gap-4 py-6">
+        <div className="chat-container grid gap-4">
+          <p className="text-textSecondary ">chat</p>
+
+          <div className="chats w-full overflow-scroll text-lg h-96">
+            {roomDetails.messages.map((value, id) => {
+              return (
+                <div
+                  key={id}
+                  className={`chat w-full flex gap-2 ${value.id === userId ? "text-primaryColor" : "text-textSecondary"}`}
+                >
+                  <p>{value.name}</p>
+                  <p>:</p>
+                  <p
+                    className={`${value.type === messageType.update ? "text-textSecondary" : "text-textPrimary"}`}
+                  >
+                    Hello
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+          <input
+            type="text"
+            className="w-full bg-nav rounded-md outline-none p-2 px-4 caret-primaryColor"
+            placeholder="Hit enter to send message"
+          />
+        </div>
+        <div className=" flex flex-col gap-6 text-textPrimary">
+          <div className=" p-2 flex flex-col gap-4">
+            <div className="w-full p-3 flex items-center gap-2 justify-center bg-nav rounded-md hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]">
+              <Keyboard />
+              <h3>Start test</h3>
+            </div>
+            <div className="w-full p-2 flex items-center gap-2 justify-center bg-nav rounded-md hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]">
+              <DoorOpen />
+              <h3>Leave room</h3>
+            </div>
+          </div>
+          <div className="w-full grid gap-2">
+            <p className="text-textSecondary">Users</p>
+            <div className="user-list w-full  h-[300px] overflow-auto">
+              <div className="user w-full ">
+                {roomDetails.users.map((user, id) => {
+                  return (
+                    <p
+                      key={id}
+                      className={`${user.userId === userId ? "text-primaryColor" : "text-textPrimary"}`}
+                    >
+                      {user.isAdmin ? `★ ${user.name}` : user.name}
+                    </p>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="room-code w-full text-center ">
+        <p className="text-textSecondary text-xl">room code</p>
+        <h1 className="text-primaryColor text-4xl">{roomDetails.roomId}</h1>
+      </div>
+    </div>
+  );
+}
+
+export default Room;

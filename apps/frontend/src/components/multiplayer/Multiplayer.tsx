@@ -4,7 +4,7 @@ import { firstUserPayload, roomDetailsType, wsStatus } from "../../types";
 import { v4 as uuid } from "uuid";
 import { toast } from "react-toastify";
 import { ToastStlye } from "../../utils";
-import Room from "./Room";
+import Room from "./Room2";
 import ConnectionError from "./ConnectionError";
 
 function Multiplayer() {
@@ -97,7 +97,7 @@ function Multiplayer() {
   const handleFirstUser = (payload: firstUserPayload) => {
     const { roomId, name, userId, isAdmin, difficulty, progress, time } =
       payload;
-    console.log(roomId, name, userId, isAdmin);
+    console.log(roomId, name, userId, isAdmin, difficulty, progress, time);
     if (
       !roomId ||
       !name ||
@@ -150,7 +150,7 @@ function Multiplayer() {
   }
 
   return roomDetails?.roomId ? (
-    <Room />
+    <Room roomDetails={roomDetails} userId={userId.current} />
   ) : (
     wsConnection.current && (
       <Home userId={userId.current} wsConnection={wsConnection.current} />

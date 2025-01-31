@@ -224,7 +224,7 @@ function GameArea() {
   return (
     <div>
       <div className="nav w-full flex items-center justify-center pb-4 pt-2 ">
-        <div className="time  flex rounded-lg bg-nav py-1 px-2 text-textSecondary font-robotoMono text-lg   ">
+        <div className="flex rounded-lg bg-nav py-1 px-2 text-textSecondary font-robotoMono text-lg   ">
           <div
             className={`px-2 cursor-pointer   ${GAME_DIFFICULTY.current === wordDifficulty.easy ? "text-primaryColor" : "hover:text-textPrimary"}`}
             onClick={() => {

@@ -49,11 +49,12 @@ export class RoomManager {
     return usersList ?? [];
   }
 
-  addUserToRoom(roomId: string, user: User) {
+  addUserToRoom(roomId: string, user: User, userName: string) {
     const data = this.rooms.get(roomId);
-    if (!data) return;
+    if (!data || Object.keys(data).length === 0) return;
     const users = data?.users;
-    let name = user.name;
+    let name = userName;
+    console.log(name);
     if (users) {
       this.rooms.set(roomId, {
         ...data,
@@ -67,11 +68,12 @@ export class RoomManager {
       }, 0);
       name = count && count > 1 ? `${name} (${count})` : name;
     }
+    console.log(name);
     const response = {
       name,
       difficulty: data.difficulty,
       progress: data.progress,
-      thime: data.time,
+      time: data.time,
     };
 
     return response;

@@ -49,7 +49,11 @@ export class User {
             return;
           }
 
-          const response = RoomManagerInstance.addUserToRoom(roomId, this);
+          const response = RoomManagerInstance.addUserToRoom(
+            roomId,
+            this,
+            name
+          );
           if (!response) {
             this.sendMessage({
               type: "invalid-request",
@@ -60,7 +64,7 @@ export class User {
           this.id = userId;
           this.roomId = roomId;
           this.name = name;
-          this.displayName;
+          this.displayName = response.name;
 
           this.sendMessage({
             type: "room-joined",
