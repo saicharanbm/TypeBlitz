@@ -52,3 +52,9 @@ export type Message = {
   id: string;
   message: string;
 };
+
+export enum wordDifficulty {
+  easy = "easy",
+  medium = "medium",
+  hard = "hard",
+}
