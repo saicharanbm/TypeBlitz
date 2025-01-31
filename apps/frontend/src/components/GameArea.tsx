@@ -238,6 +238,7 @@ function GameArea() {
             <span>Easy</span>
           </div>
           <div className="spacer w-1 my-1 rounded-md bg-bgColor"></div>
+
           <div
             className={`px-2 cursor-pointer   ${GAME_DIFFICULTY.current === wordDifficulty.medium ? "text-primaryColor" : "hover:text-textPrimary"}`}
             onClick={() => {
@@ -256,9 +257,6 @@ function GameArea() {
           >
             <span>Hard</span>
           </div>
-          <div className="spacer w-1 my-1 rounded-md bg-bgColor"></div>
-        </div>
-        <div className="time  flex rounded-lg bg-nav py-1 px-2 text-textSecondary font-robotoMono text-lg   ">
           <div
             className={`px-2 cursor-pointer   ${GAME_TIME.current === 15 ? "text-primaryColor" : "hover:text-textPrimary"}`}
             onClick={() => {
@@ -268,6 +266,7 @@ function GameArea() {
             <span>15</span>
           </div>
           <div className="spacer w-1 my-1 rounded-md bg-bgColor"></div>
+
           <div
             className={`px-2 cursor-pointer   ${GAME_TIME.current === 30 ? "text-primaryColor" : "hover:text-textPrimary"}`}
             onClick={() => {
