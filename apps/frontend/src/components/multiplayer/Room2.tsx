@@ -5,13 +5,59 @@ import {
   totalTime,
   wordDifficulty,
 } from "../../types";
+import { useState } from "react";
 
 type RoomProps = {
   roomDetails: roomDetailsType;
+  setRoomDetails: React.Dispatch<
+    React.SetStateAction<roomDetailsType | undefined>
+  >;
   userId: string;
+  wsConnection: WebSocket;
 };
 
-function Room({ roomDetails, userId }: RoomProps) {
+function Room({
+  roomDetails,
+  setRoomDetails,
+  userId,
+  wsConnection,
+}: RoomProps) {
+  const [message, setMessage] = useState("");
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Prevents form submission (if inside a form)
+      if (message.trim()) {
+        wsConnection.send(
+          JSON.stringify({
+            type: "message",
+            payload: {
+              message,
+            },
+          })
+        );
+        setRoomDetails((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            messages: [
+              ...prev.messages,
+              {
+                id: userId,
+                name: prev.users.filter((user) => user.userId === userId)[0]
+                  ?.name,
+                message,
+                type: messageType.message,
+              },
+            ],
+          };
+        });
+
+        console.log("Sending message:", message);
+        setMessage(""); // Clear input after sending
+      }
+    }
+  };
   return (
     <div className="w-full">
       <div className="nav w-full flex items-center justify-center pb-4 pt-2 ">
@@ -100,7 +146,7 @@ function Room({ roomDetails, userId }: RoomProps) {
                   <p
                     className={`${value.type === messageType.update ? "text-textSecondary" : "text-textPrimary"}`}
                   >
-                    Hello
+                    {value.message}
                   </p>
                 </div>
               );
@@ -110,6 +156,9 @@ function Room({ roomDetails, userId }: RoomProps) {
             type="text"
             className="w-full bg-nav rounded-md outline-none p-2 px-4 caret-primaryColor"
             placeholder="Hit enter to send message"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
         </div>
         <div className=" flex flex-col gap-6 text-textPrimary">

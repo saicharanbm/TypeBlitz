@@ -92,6 +92,11 @@ export enum gameProgress {
   playing = "playing",
   finished = "finished",
 }
+export interface updateUserPayload {
+  name: string;
+  userId: string;
+  isAdmin: boolean;
+}
 export enum wordDifficulty {
   easy = "easy",
   medium = "medium",

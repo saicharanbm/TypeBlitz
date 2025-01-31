@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import Home from "./Home";
-import { firstUserPayload, roomDetailsType, wsStatus } from "../../types";
+import {
+  firstUserPayload,
+  messageType,
+  roomDetailsType,
+  updateUserPayload,
+  wsStatus,
+} from "../../types";
 import { v4 as uuid } from "uuid";
 import { toast } from "react-toastify";
 import { ToastStlye } from "../../utils";
@@ -45,6 +51,12 @@ function Multiplayer() {
             case "room-created":
             case "room-joined":
               handleFirstUser(data.payload);
+              break;
+            case "user-joined":
+              updateUsers(data.payload);
+              break;
+            case "message":
+              updateMessage(data.payload);
               break;
 
             case "room-doesnot-exist":
@@ -97,7 +109,7 @@ function Multiplayer() {
   const handleFirstUser = (payload: firstUserPayload) => {
     const { roomId, name, userId, isAdmin, difficulty, progress, time } =
       payload;
-    console.log(roomId, name, userId, isAdmin, difficulty, progress, time);
+
     if (
       !roomId ||
       !name ||
@@ -120,6 +132,59 @@ function Multiplayer() {
       progress,
       users: [{ name, userId, isAdmin }],
       messages: [],
+    });
+  };
+
+  const updateUsers = (payload: updateUserPayload) => {
+    const { name, userId, isAdmin } = payload;
+    console.log(payload);
+    if (!name || !userId || typeof isAdmin !== "boolean") {
+      showToastError("Something went wrong while adding users.");
+      return;
+    }
+
+    setRoomDetails((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        users: [...prev.users, { name, userId, isAdmin }],
+        messages: [
+          ...prev.messages,
+          {
+            id: userId,
+            message: "Joined the room.",
+            name,
+            type: messageType.update,
+          },
+        ],
+      };
+    });
+  };
+
+  const updateMessage = (payload: {
+    message: string;
+    userId: string;
+    name: string;
+  }) => {
+    const { message, userId, name } = payload;
+    if (!message || !userId || !name) {
+      return;
+    }
+
+    setRoomDetails((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        messages: [
+          ...prev.messages,
+          {
+            id: userId,
+            message,
+            name,
+            type: messageType.message,
+          },
+        ],
+      };
     });
   };
 
@@ -149,8 +214,13 @@ function Multiplayer() {
     );
   }
 
-  return roomDetails?.roomId ? (
-    <Room roomDetails={roomDetails} userId={userId.current} />
+  return roomDetails?.roomId && wsConnection.current ? (
+    <Room
+      roomDetails={roomDetails}
+      setRoomDetails={setRoomDetails}
+      userId={userId.current}
+      wsConnection={wsConnection.current}
+    />
   ) : (
     wsConnection.current && (
       <Home userId={userId.current} wsConnection={wsConnection.current} />

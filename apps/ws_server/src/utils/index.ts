@@ -1,6 +1,6 @@
 import { RoomManager } from "../RoomManager";
 import { roomIdString, wordsEasy, wordsMedium, wordsHard } from "./data";
-import { wordDifficulty } from "./types";
+import { wordDifficulty } from "../types";
 
 export const getRandomWord = (wordType: wordDifficulty): string => {
   const words =

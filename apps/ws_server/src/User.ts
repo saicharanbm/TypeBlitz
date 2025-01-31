@@ -2,7 +2,7 @@ import { WebSocket } from "ws";
 // import { v4 as uuid } from "uuid";
 import { RoomManager } from "./RoomManager";
 import { generateRoomId } from "./utils";
-import { gameProgress, totalTime, wordDifficulty } from "./utils/types";
+import { gameProgress, totalTime, wordDifficulty } from "./types";
 export class User {
   id: string = "";
   roomId: string = "";
@@ -95,7 +95,7 @@ export class User {
               type: "user-joined",
               payload: {
                 name: this.displayName,
-                useId: this.id,
+                userId: this.id,
                 isAdmin: this.isAdmin,
               },
             },
@@ -135,6 +135,24 @@ export class User {
               isAdmin: this.isAdmin,
             },
           });
+          break;
+        }
+        case "message": {
+          const { message } = data.payload;
+          if (message.trim()) {
+            RoomManager.getInstance().broadcastMessage(
+              this.roomId,
+              {
+                type: "message",
+                payload: {
+                  userId: this.id,
+                  name: this.displayName,
+                  message,
+                },
+              },
+              this.id
+            );
+          }
           break;
         }
       }

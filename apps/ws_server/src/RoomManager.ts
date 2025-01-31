@@ -1,11 +1,6 @@
 import { User } from "./User";
 import { generateRoomId, getRandomWord } from "./utils";
-import {
-  gameProgress,
-  roomDetails,
-  totalTime,
-  wordDifficulty,
-} from "./utils/types";
+import { gameProgress, roomDetails, totalTime, wordDifficulty } from "./types";
 
 export class RoomManager {
   rooms: Map<string, roomDetails> = new Map<string, roomDetails>();
@@ -66,7 +61,7 @@ export class RoomManager {
       const count = this.rooms.get(roomId)?.users.reduce((acc, user) => {
         return user.name === name ? acc + 1 : acc;
       }, 0);
-      name = count && count > 1 ? `${name} (${count})` : name;
+      name = count && count > 0 ? `${name} (${count})` : name;
     }
     console.log(name);
     const response = {
