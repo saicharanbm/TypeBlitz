@@ -1,7 +1,14 @@
 import { RoomManager } from "../RoomManager";
-import { words, roomIdString } from "./data";
+import { roomIdString, wordsEasy, wordsMedium, wordsHard } from "./data";
+import { wordDifficulty } from "./types";
 
-export const getRandomWord = (): string => {
+export const getRandomWord = (wordType: wordDifficulty): string => {
+  const words =
+    wordType === wordDifficulty.easy
+      ? wordsEasy
+      : wordType === wordDifficulty.medium
+        ? wordsMedium
+        : wordsHard;
   const randomIndex = Math.floor(Math.random() * words.length);
   return words[randomIndex];
 };

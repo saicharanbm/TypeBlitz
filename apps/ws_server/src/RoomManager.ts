@@ -1,11 +1,14 @@
 import { User } from "./User";
 import { generateRoomId, getRandomWord } from "./utils";
-interface roomData {
-  users: User[];
-  words: string[];
-}
+import {
+  gameProgress,
+  roomDetails,
+  totalTime,
+  wordDifficulty,
+} from "./utils/types";
+
 export class RoomManager {
-  rooms: Map<string, roomData> = new Map<string, roomData>();
+  rooms: Map<string, roomDetails> = new Map<string, roomDetails>();
   private static instance: RoomManager = new RoomManager();
   private constructor() {}
   static getInstance() {
@@ -18,6 +21,7 @@ export class RoomManager {
     const data = this.rooms.get(roomId);
     if (data) {
       this.rooms.set(roomId, {
+        ...data,
         users: data.users.filter((u) => u.id !== userId),
         words: data.words,
       });
@@ -50,7 +54,11 @@ export class RoomManager {
     const users = data?.users;
     let name = user.name;
     if (users) {
-      this.rooms.set(roomId, { users: [...users, user], words: data.words });
+      this.rooms.set(roomId, {
+        ...data,
+        users: [...users, user],
+        words: data.words,
+      });
       //get the count of users with same name in the room
       const count = this.rooms.get(roomId)?.users.reduce((acc, user) => {
         return user.name === name ? acc + 1 : acc;
@@ -72,11 +80,19 @@ export class RoomManager {
   createRoom(user: User) {
     const roomId = generateRoomId();
     const words = Array.from({ length: 200 }, (_, id) => {
-      const word = getRandomWord();
+      const word = getRandomWord(wordDifficulty.easy);
       return id === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word;
     });
+    const data: roomDetails = {
+      words,
+      time: totalTime.sixty,
+      roomId,
+      difficulty: wordDifficulty.easy,
+      users: [user],
+      progress: gameProgress.waiting,
+    };
 
-    this.rooms.set(roomId, { users: [user], words });
+    this.rooms.set(roomId, data);
     return roomId;
   }
 
