@@ -1,4 +1,4 @@
-export const words = [
+export const wordsEasy = [
   "the",
   "be",
   "of",
@@ -201,7 +201,7 @@ export const words = [
   "line",
 ];
 
-export const wordMedium = [
+export const wordsMedium = [
   "hark",
   "thou",
   "thy",
@@ -396,7 +396,7 @@ export const wordMedium = [
   "lord",
   "lady",
 ];
-export const wordHard = [
+export const wordsHard = [
   "incontinence",
   "infarct",
   "infestation",

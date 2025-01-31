@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { GameState, letterType, wordDifficulty } from "../types";
-import { words } from "../utils/data";
+import { RotateCw } from "lucide-react";
+import { getRandomWord } from "../utils";
 
 function GameArea() {
   const GAME_TIME = useRef<number>(30); // Time in seconds
@@ -18,14 +19,9 @@ function GameArea() {
   });
   const gameRef = useRef<HTMLDivElement | null>(null);
 
-  const getRandomWord = (): string => {
-    const randomIndex = Math.floor(Math.random() * words.length);
-    return words[randomIndex];
-  };
-
   const initializeGame = useCallback((): void => {
     const newOriginalWords = Array.from({ length: 200 }, (_, id) => {
-      const word = getRandomWord();
+      const word = getRandomWord(GAME_DIFFICULTY.current);
       return id === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word;
     });
     const newWords = newOriginalWords.map((word) =>
@@ -303,12 +299,6 @@ function GameArea() {
             ? `WPM: ${gameState.wpm}`
             : gameState.timeLeft}
         </div>
-        <button
-          onClick={initializeGame}
-          className="bg-white/20 text-white/50 px-5 py-1.5 rounded hover:bg-white/30 transition-colors"
-        >
-          New game
-        </button>
       </div>
       <div
         className={` relative h-[144px] w-full  ${gameRef.current !== document.activeElement ? "cursor-pointer" : ""} `}
@@ -362,6 +352,12 @@ function GameArea() {
             ))}
           </div>
         </div>
+      </div>
+      <div
+        className="w-full p-7 md:p-12  flex items-center justify-center text-textSecondary cursor-pointer hover:text-textPrimary transition-colors duration-[150ms] "
+        onClick={initializeGame}
+      >
+        <RotateCw size={28} strokeWidth={3} />
       </div>
     </div>
   );
