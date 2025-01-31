@@ -5,7 +5,8 @@ import {
   totalTime,
   wordDifficulty,
 } from "../../types";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { isUserAdmin } from "../../utils";
 
 type RoomProps = {
   roomDetails: roomDetailsType;
@@ -23,6 +24,7 @@ function Room({
   wsConnection,
 }: RoomProps) {
   const [message, setMessage] = useState("");
+  const isAdmin = useRef<boolean>(isUserAdmin(userId, roomDetails.users));
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -58,14 +60,50 @@ function Room({
       }
     }
   };
+  const updateDifficulty = (difficulty: wordDifficulty) => {
+    wsConnection.send(
+      JSON.stringify({
+        type: "update-room-details",
+        payload: {
+          difficulty,
+          time: roomDetails.time,
+        },
+      })
+    );
+    setRoomDetails((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        difficulty,
+      };
+    });
+  };
+  const updateTime = (time: totalTime) => {
+    wsConnection.send(
+      JSON.stringify({
+        type: "update-room-details",
+        payload: {
+          difficulty: roomDetails.difficulty,
+          time,
+        },
+      })
+    );
+    setRoomDetails((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        time,
+      };
+    });
+  };
   return (
     <div className="w-full">
       <div className="nav w-full flex items-center justify-center pb-4 pt-2 ">
         <div className="flex rounded-lg bg-nav py-1 px-2 text-textSecondary font-robotoMono text-lg   ">
           <div
-            className={`px-2 cursor-pointer   ${roomDetails.difficulty === wordDifficulty.easy ? "text-primaryColor" : "hover:text-textPrimary"}`}
+            className={`px-2 ${isAdmin.current ? "cursor-pointer" : ""}   ${roomDetails.difficulty === wordDifficulty.easy ? "text-primaryColor" : isAdmin.current ? "hover:text-textPrimary" : ""}`}
             onClick={() => {
-              // changeDifficulty(wordDifficulty.easy);
+              if (isAdmin.current) updateDifficulty(wordDifficulty.easy);
             }}
           >
             <span>Easy</span>
@@ -73,9 +111,9 @@ function Room({
           <div className="spacer w-1 my-1 rounded-md bg-bgColor"></div>
 
           <div
-            className={`px-2 cursor-pointer   ${roomDetails.difficulty === wordDifficulty.medium ? "text-primaryColor" : "hover:text-textPrimary"}`}
+            className={`px-2 ${isAdmin.current ? "cursor-pointer" : ""}   ${roomDetails.difficulty === wordDifficulty.medium ? "text-primaryColor" : isAdmin.current ? "hover:text-textPrimary" : ""}`}
             onClick={() => {
-              // changeDifficulty(wordDifficulty.medium);
+              if (isAdmin.current) updateDifficulty(wordDifficulty.medium);
             }}
           >
             <span>Medium</span>
@@ -83,17 +121,17 @@ function Room({
           <div className="spacer w-1 my-1 rounded-md bg-bgColor"></div>
 
           <div
-            className={`px-2 cursor-pointer   ${roomDetails.difficulty === wordDifficulty.hard ? "text-primaryColor" : "hover:text-textPrimary"}`}
+            className={`px-2 ${isAdmin.current ? "cursor-pointer" : ""}  ${roomDetails.difficulty === wordDifficulty.hard ? "text-primaryColor" : isAdmin.current ? "hover:text-textPrimary" : ""}`}
             onClick={() => {
-              // changeDifficulty(wordDifficulty.hard);
+              if (isAdmin.current) updateDifficulty(wordDifficulty.hard);
             }}
           >
             <span>Hard</span>
           </div>
           <div
-            className={`px-2 cursor-pointer   ${roomDetails.time === totalTime.fifteen ? "text-primaryColor" : "hover:text-textPrimary"}`}
+            className={`px-2 ${isAdmin.current ? "cursor-pointer" : ""}   ${roomDetails.time === totalTime.fifteen ? "text-primaryColor" : isAdmin.current ? "hover:text-textPrimary" : ""}`}
             onClick={() => {
-              // changeTime(15);
+              if (isAdmin.current) updateTime(totalTime.fifteen);
             }}
           >
             <span>15s</span>
@@ -101,9 +139,9 @@ function Room({
           <div className="spacer w-1 my-1 rounded-md bg-bgColor"></div>
 
           <div
-            className={`px-2 cursor-pointer   ${roomDetails.time === totalTime.thirty ? "text-primaryColor" : "hover:text-textPrimary"}`}
+            className={`px-2 ${isAdmin.current ? "cursor-pointer" : ""}   ${roomDetails.time === totalTime.thirty ? "text-primaryColor" : isAdmin.current ? "hover:text-textPrimary" : ""}`}
             onClick={() => {
-              // changeTime(30);
+              if (isAdmin.current) updateTime(totalTime.thirty);
             }}
           >
             <span>30s</span>
@@ -111,9 +149,9 @@ function Room({
           <div className="spacer w-1 my-1 rounded-md bg-bgColor"></div>
 
           <div
-            className={`px-2 cursor-pointer   ${roomDetails.time === totalTime.sixty ? "text-primaryColor" : "hover:text-textPrimary"}`}
+            className={`px-2 ${isAdmin.current ? "cursor-pointer" : ""}   ${roomDetails.time === totalTime.sixty ? "text-primaryColor" : isAdmin.current ? "hover:text-textPrimary" : ""}`}
             onClick={() => {
-              // changeTime(60);
+              if (isAdmin.current) updateTime(totalTime.sixty);
             }}
           >
             <span>60s</span>
@@ -121,9 +159,9 @@ function Room({
           <div className="spacer w-1 my-1 rounded-md bg-bgColor"></div>
 
           <div
-            className={`px-2 cursor-pointer   ${roomDetails.time === totalTime.onetwenty ? "text-primaryColor" : "hover:text-textPrimary"}`}
+            className={`px-2 ${isAdmin.current ? "cursor-pointer" : ""}   ${roomDetails.time === totalTime.onetwenty ? "text-primaryColor" : isAdmin.current ? "hover:text-textPrimary" : ""}`}
             onClick={() => {
-              // changeTime(120);
+              if (isAdmin.current) updateTime(totalTime.onetwenty);
             }}
           >
             <span>120s</span>

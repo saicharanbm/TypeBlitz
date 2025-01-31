@@ -4,7 +4,9 @@ import {
   firstUserPayload,
   messageType,
   roomDetailsType,
+  totalTime,
   updateUserPayload,
+  wordDifficulty,
   wsStatus,
 } from "../../types";
 import { v4 as uuid } from "uuid";
@@ -19,10 +21,7 @@ function Multiplayer() {
   );
   const [reloadCount, setReloadCount] = useState(0);
   const wsConnection = useRef<WebSocket | null>(null);
-  // const [gameDetails, setGameDetails] = useState<gameDetails>({
-  //   difficulty: wordDifficulty.easy,
-  //   time: totalTime.sixty,
-  // });
+
   const [roomDetails, setRoomDetails] = useState<roomDetailsType>();
   const userId = useRef(uuid());
 
@@ -74,6 +73,9 @@ function Multiplayer() {
               break;
             case "user-list":
               addUserList(data.payload.users);
+              break;
+            case "room-details-update":
+              updateRoomData(data.payload);
               break;
 
             default:
@@ -169,6 +171,20 @@ function Multiplayer() {
             type: messageType.update,
           },
         ],
+      };
+    });
+  };
+  const updateRoomData = (payload: {
+    difficulty: wordDifficulty;
+    time: totalTime;
+  }) => {
+    const { difficulty, time } = payload;
+    setRoomDetails((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        difficulty,
+        time,
       };
     });
   };

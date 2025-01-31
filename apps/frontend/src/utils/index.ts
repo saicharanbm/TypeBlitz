@@ -1,4 +1,5 @@
-import { wordDifficulty } from "../types";
+import { useId } from "react";
+import { Users, wordDifficulty } from "../types";
 import { wordsEasy, wordsMedium, wordsHard } from "./data";
 
 export const ToastStlye = {
@@ -18,4 +19,9 @@ export const getRandomWord = (wordType: wordDifficulty): string => {
         : wordsHard;
   const randomIndex = Math.floor(Math.random() * words.length);
   return words[randomIndex];
+};
+export const isUserAdmin = (userId: string, users: Users[]) => {
+  console.log(userId, users);
+  const adminUser = users.find((user) => user.isAdmin);
+  return adminUser ? adminUser.userId === userId : false;
 };
