@@ -1,7 +1,7 @@
 import { WebSocket } from "ws";
 // import { v4 as uuid } from "uuid";
 import { RoomManager } from "./RoomManager";
-import { generateRoomId } from "./utils";
+import { generateRoomId, isDifficulty, isTotalTime } from "./utils";
 import { gameProgress, totalTime, wordDifficulty } from "./types";
 export class User {
   id: string = "";
@@ -155,6 +155,34 @@ export class User {
           }
           break;
         }
+        case "update-room-details":
+          const { time, difficulty } = data.payload;
+          if (isDifficulty(difficulty) && isTotalTime(time)) {
+            const RoomManagerInstance = RoomManager.getInstance();
+            RoomManagerInstance.updateRoomDetails(
+              this.roomId,
+              time,
+              difficulty
+            );
+            RoomManagerInstance.broadcastMessage(
+              this.roomId,
+              {
+                type: "room-details-update",
+                payload: {
+                  time,
+                  difficulty,
+                },
+              },
+              this.id
+            );
+
+            return;
+          }
+          this.sendMessage({
+            type: "invalid-request",
+            payload: { message: "Please provide all the details." },
+          });
+          break;
       }
     });
   }

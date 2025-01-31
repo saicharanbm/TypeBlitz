@@ -32,6 +32,18 @@ export class RoomManager {
     return data?.users ? data.users.some((user) => user.id === userId) : false;
   }
 
+  updateRoomDetails(
+    roomId: string,
+    time: totalTime,
+    difficulty: wordDifficulty
+  ) {
+    const roomData = this.rooms.get(roomId);
+    if (roomData) {
+      roomData.difficulty = difficulty;
+      roomData.time = time;
+    }
+  }
+
   getAllUsers(roomId: string, userId: string) {
     const users = this.rooms.get(roomId)?.users;
     const usersList = users

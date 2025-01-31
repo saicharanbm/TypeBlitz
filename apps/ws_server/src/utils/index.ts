@@ -1,6 +1,6 @@
 import { RoomManager } from "../RoomManager";
 import { roomIdString, wordsEasy, wordsMedium, wordsHard } from "./data";
-import { wordDifficulty } from "../types";
+import { totalTime, wordDifficulty } from "../types";
 
 export const getRandomWord = (wordType: wordDifficulty): string => {
   const words =
@@ -32,3 +32,11 @@ export const generateRoomId = () => {
     "Unable to generate a unique room ID after multiple attempts"
   );
 };
+
+export function isDifficulty(value: any): value is wordDifficulty {
+  return Object.values(wordDifficulty).includes(value);
+}
+
+export function isTotalTime(value: any): value is totalTime {
+  return Object.values(totalTime).includes(value);
+}

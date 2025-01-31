@@ -96,7 +96,7 @@ function Room({
               // changeTime(15);
             }}
           >
-            <span>15</span>
+            <span>15s</span>
           </div>
           <div className="spacer w-1 my-1 rounded-md bg-bgColor"></div>
 
@@ -106,7 +106,7 @@ function Room({
               // changeTime(30);
             }}
           >
-            <span>30</span>
+            <span>30s</span>
           </div>
           <div className="spacer w-1 my-1 rounded-md bg-bgColor"></div>
 
@@ -116,7 +116,7 @@ function Room({
               // changeTime(60);
             }}
           >
-            <span>60</span>
+            <span>60s</span>
           </div>
           <div className="spacer w-1 my-1 rounded-md bg-bgColor"></div>
 
@@ -126,7 +126,7 @@ function Room({
               // changeTime(120);
             }}
           >
-            <span>120</span>
+            <span>120s</span>
           </div>
         </div>
       </div>

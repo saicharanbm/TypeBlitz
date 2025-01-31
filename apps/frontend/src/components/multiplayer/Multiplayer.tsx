@@ -72,6 +72,9 @@ function Multiplayer() {
             case "user-already-in-the-room":
               showToastError("User has already joined the room.");
               break;
+            case "user-list":
+              addUserList(data.payload.users);
+              break;
 
             default:
               console.warn("Unknown message type:", data.type);
@@ -132,6 +135,15 @@ function Multiplayer() {
       progress,
       users: [{ name, userId, isAdmin }],
       messages: [],
+    });
+  };
+  const addUserList = (payload: updateUserPayload[]) => {
+    setRoomDetails((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        users: [...prev.users, ...payload],
+      };
     });
   };
 
