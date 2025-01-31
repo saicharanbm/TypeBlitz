@@ -9,7 +9,7 @@ const Home = memo(({ userId, wsConnection }: HomeProps) => {
   const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
 
   return (
-    <div className="w-full pt-16 flex gap-4 font-robotoMono">
+    <div className="w-full  pt-16 flex gap-4 font-robotoMono justify-center">
       <div
         className="bg-[#2c2e31] py-24 w-full flex flex-col items-center rounded-lg hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]"
         onClick={() => {
