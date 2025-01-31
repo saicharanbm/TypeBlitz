@@ -1,4 +1,5 @@
 import { Keyboard, DoorOpen } from "lucide-react";
+
 function Room() {
   return (
     <div className="w-full">

@@ -2,6 +2,7 @@ import { WebSocket } from "ws";
 // import { v4 as uuid } from "uuid";
 import { RoomManager } from "./RoomManager";
 import { generateRoomId } from "./utils";
+import { gameProgress, totalTime, wordDifficulty } from "./utils/types";
 export class User {
   id: string = "";
   roomId: string = "";
@@ -47,14 +48,24 @@ export class User {
             this.sendMessage({ type: "user-already-in-the-room" });
             return;
           }
+
+          const response = RoomManagerInstance.addUserToRoom(roomId, this);
+          if (!response) {
+            this.sendMessage({
+              type: "invalid-request",
+              payload: { message: "Please provide all the details." },
+            });
+            return;
+          }
           this.id = userId;
           this.roomId = roomId;
           this.name = name;
-          this.displayName = RoomManagerInstance.addUserToRoom(roomId, this);
+          this.displayName;
 
           this.sendMessage({
             type: "room-joined",
             payload: {
+              ...response,
               roomId: this.roomId,
               name: this.displayName,
               userId: this.id,
@@ -111,6 +122,9 @@ export class User {
           this.sendMessage({
             type: "room-created",
             payload: {
+              difficulty: wordDifficulty.easy,
+              time: totalTime.sixty,
+              progress: gameProgress.waiting,
               roomId: this.roomId,
               name: this.displayName,
               userId: this.id,

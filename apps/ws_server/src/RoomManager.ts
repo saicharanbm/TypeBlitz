@@ -51,6 +51,7 @@ export class RoomManager {
 
   addUserToRoom(roomId: string, user: User) {
     const data = this.rooms.get(roomId);
+    if (!data) return;
     const users = data?.users;
     let name = user.name;
     if (users) {
@@ -59,22 +60,21 @@ export class RoomManager {
         users: [...users, user],
         words: data.words,
       });
+
       //get the count of users with same name in the room
       const count = this.rooms.get(roomId)?.users.reduce((acc, user) => {
         return user.name === name ? acc + 1 : acc;
       }, 0);
       name = count && count > 1 ? `${name} (${count})` : name;
     }
-    // else {
-    //   //generate words
-    //   const words = Array.from({ length: 200 }, (_, id) => {
-    //     const word = getRandomWord();
-    //     return id === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word;
-    //   });
+    const response = {
+      name,
+      difficulty: data.difficulty,
+      progress: data.progress,
+      thime: data.time,
+    };
 
-    //   this.rooms.set(roomId, { users: [user], words });
-    // }
-    return name;
+    return response;
   }
 
   createRoom(user: User) {

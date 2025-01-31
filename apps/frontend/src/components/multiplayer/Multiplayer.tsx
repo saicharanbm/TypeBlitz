@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import Home from "./Home";
-import { Link } from "react-router-dom";
-import { roomDetailsType, wsStatus } from "../../types";
+import { firstUserPayload, roomDetailsType, wsStatus } from "../../types";
 import { v4 as uuid } from "uuid";
 import { toast } from "react-toastify";
 import { ToastStlye } from "../../utils";
 import Room from "./Room";
+import ConnectionError from "./ConnectionError";
 
 function Multiplayer() {
   const [connectionStatus, setConnectionStatus] = useState<wsStatus>(
@@ -13,6 +13,10 @@ function Multiplayer() {
   );
   const [reloadCount, setReloadCount] = useState(0);
   const wsConnection = useRef<WebSocket | null>(null);
+  // const [gameDetails, setGameDetails] = useState<gameDetails>({
+  //   difficulty: wordDifficulty.easy,
+  //   time: totalTime.sixty,
+  // });
   const [roomDetails, setRoomDetails] = useState<roomDetailsType>();
   const userId = useRef(uuid());
 
@@ -90,19 +94,30 @@ function Multiplayer() {
     };
   }, [reloadCount]);
 
-  const handleFirstUser = (payload: any) => {
-    const { roomId, name, userId, isAdmin } = payload;
+  const handleFirstUser = (payload: firstUserPayload) => {
+    const { roomId, name, userId, isAdmin, difficulty, progress, time } =
+      payload;
     console.log(roomId, name, userId, isAdmin);
-    if (!roomId || !name || !userId || typeof isAdmin !== "boolean") {
+    if (
+      !roomId ||
+      !name ||
+      !userId ||
+      !difficulty ||
+      !progress ||
+      !time ||
+      typeof isAdmin !== "boolean"
+    ) {
       console.log("error");
       showToastError("Something went wrong while creating the room.");
       return;
     }
-    toast.dismiss();
-    toast.success(`Room with id ${roomId} successfully created.`, ToastStlye);
+    showToastSuccess(`Room with id ${roomId} successfully created.`);
 
     setRoomDetails({
       roomId,
+      difficulty,
+      time,
+      progress,
       users: [{ name, userId, isAdmin }],
       messages: [],
     });
@@ -112,34 +127,17 @@ function Multiplayer() {
     toast.dismiss();
     toast.error(message, ToastStlye);
   };
+  const showToastSuccess = (message: string) => {
+    toast.dismiss();
+    toast.success(message, ToastStlye);
+  };
 
   if (connectionStatus === wsStatus.error) {
     return (
-      <div className="w-full p-28 flex flex-col items-center justify-center">
-        {reloadCount < 4 ? (
-          <>
-            <p>Failed to connect to the WebSocket server. Retrying...</p>
-            <button
-              onClick={() => setReloadCount((prev) => prev + 1)}
-              className="mt-4 px-4 py-2 bg-nav rounded-lg hover:bg-textPrimary hover:text-nav transition"
-            >
-              Reload Page
-            </button>
-          </>
-        ) : (
-          <>
-            <p className="text-incorrect">
-              Something went wrong. Please try again later.
-            </p>
-            <Link
-              className="mt-4 px-4 py-2 bg-nav rounded-lg hover:bg-textPrimary hover:text-nav transition"
-              to="/"
-            >
-              Home
-            </Link>
-          </>
-        )}
-      </div>
+      <ConnectionError
+        reloadCount={reloadCount}
+        setReloadCount={setReloadCount}
+      />
     );
   }
 
