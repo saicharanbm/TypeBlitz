@@ -155,7 +155,7 @@ export class User {
           }
           break;
         }
-        case "update-room-details":
+        case "update-room-details": {
           const { time, difficulty } = data.payload;
           if (isDifficulty(difficulty) && isTotalTime(time)) {
             const RoomManagerInstance = RoomManager.getInstance();
@@ -183,11 +183,36 @@ export class User {
             payload: { message: "Please provide all the details." },
           });
           break;
+        }
+        case "leave-room": {
+          break;
+        }
       }
     });
   }
   destroy() {
     // do some thing
+
+    const RoomManagerInstance = RoomManager.getInstance();
+    if (this.isAdmin) {
+      RoomManagerInstance.deleteRoom(this.roomId, this.id);
+      this.ws.close();
+      return;
+    }
+    RoomManagerInstance.broadcastMessage(
+      this.roomId!,
+      {
+        type: "user-left",
+        payload: {
+          userId: this.id,
+        },
+      },
+      this.id
+    );
+    RoomManagerInstance.removeUserFromRoom(this.roomId, this.id);
+
+    //close the websocket
+    this.ws.close();
   }
   sendMessage(message: any) {
     this.ws.send(JSON.stringify(message));

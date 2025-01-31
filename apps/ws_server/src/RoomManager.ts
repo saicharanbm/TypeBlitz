@@ -18,7 +18,6 @@ export class RoomManager {
       this.rooms.set(roomId, {
         ...data,
         users: data.users.filter((u) => u.id !== userId),
-        words: data.words,
       });
     }
   }
@@ -84,6 +83,14 @@ export class RoomManager {
     };
 
     return response;
+  }
+
+  deleteRoom(roomId: string, userId: string) {
+    const data = this.rooms.get(roomId);
+    //notify all the users that the room has closed and delete the users
+    this.broadcastMessage(roomId, { type: "room-closed" }, userId);
+    data?.users.forEach((user) => user.ws.close());
+    this.rooms.delete(roomId);
   }
 
   createRoom(user: User) {

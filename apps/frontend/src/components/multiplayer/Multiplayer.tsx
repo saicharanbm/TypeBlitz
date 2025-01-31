@@ -20,93 +20,94 @@ function Multiplayer() {
     wsStatus.loading
   );
   const [reloadCount, setReloadCount] = useState(0);
-  const wsConnection = useRef<WebSocket | null>(null);
+  const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
 
   const [roomDetails, setRoomDetails] = useState<roomDetailsType>();
   const userId = useRef(uuid());
 
   useEffect(() => {
     const connectWebSocket = () => {
-      wsConnection.current = new WebSocket("ws://localhost:3001");
-      const ws = wsConnection.current;
+      setWsConnection(new WebSocket("ws://localhost:3001"));
+      if (wsConnection) {
+        wsConnection.onopen = () => {
+          console.log("WebSocket connected");
+          setConnectionStatus(wsStatus.connected);
+          wsConnection.send(
+            JSON.stringify({
+              type: "connect",
+              payload: { userId: userId.current },
+            })
+          );
+        };
 
-      ws.onopen = () => {
-        console.log("WebSocket connected");
-        setConnectionStatus(wsStatus.connected);
-        ws.send(
-          JSON.stringify({
-            type: "connect",
-            payload: { userId: userId.current },
-          })
-        );
-      };
+        wsConnection.onmessage = (response) => {
+          try {
+            const data = JSON.parse(response.data);
+            console.log(data);
 
-      ws.onmessage = (response) => {
-        try {
-          const data = JSON.parse(response.data);
-          console.log(data);
+            switch (data.type) {
+              case "room-created":
+              case "room-joined":
+                handleFirstUser(data.payload);
+                break;
+              case "user-joined":
+                updateUsers(data.payload);
+                break;
+              case "message":
+                updateMessage(data.payload);
+                break;
 
-          switch (data.type) {
-            case "room-created":
-            case "room-joined":
-              handleFirstUser(data.payload);
-              break;
-            case "user-joined":
-              updateUsers(data.payload);
-              break;
-            case "message":
-              updateMessage(data.payload);
-              break;
+              case "room-doesnot-exist":
+                showToastError(
+                  `There is no room with the id ${data.payload.roomId}`
+                );
+                break;
 
-            case "room-doesnot-exist":
-              showToastError(
-                `There is no room with the id ${data.payload.roomId}`
-              );
-              break;
+              case "invalid-request":
+                showToastError("Please provide all the details.");
+                break;
 
-            case "invalid-request":
-              showToastError("Please provide all the details.");
-              break;
+              case "user-already-in-the-room":
+                showToastError("User has already joined the room.");
+                break;
+              case "user-list":
+                addUserList(data.payload.users);
+                break;
+              case "room-details-update":
+                updateRoomData(data.payload);
+                break;
 
-            case "user-already-in-the-room":
-              showToastError("User has already joined the room.");
-              break;
-            case "user-list":
-              addUserList(data.payload.users);
-              break;
-            case "room-details-update":
-              updateRoomData(data.payload);
-              break;
-
-            default:
-              console.warn("Unknown message type:", data.type);
+              default:
+                console.warn("Unknown message type:", data.type);
+            }
+          } catch (error) {
+            console.error("Error parsing WebSocket message:", error);
           }
-        } catch (error) {
-          console.error("Error parsing WebSocket message:", error);
-        }
-      };
+        };
 
-      ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
-        setConnectionStatus(wsStatus.error);
-      };
-
-      ws.onclose = () => {
-        console.log("WebSocket closed");
-        if (connectionStatus !== wsStatus.error)
+        wsConnection.onerror = (error) => {
+          console.error("WebSocket error:", error);
           setConnectionStatus(wsStatus.error);
-        setRoomDetails(undefined);
-        userId.current = uuid();
+        };
 
-        // Retry connection with exponential backoff
-      };
+        wsConnection.onclose = () => {
+          console.log("WebSocket closed");
+          if (connectionStatus !== wsStatus.error)
+            setConnectionStatus(wsStatus.error);
+          setWsConnection(null);
+          setRoomDetails(undefined);
+          userId.current = uuid();
+
+          // Retry connection with exponential backoff
+        };
+      }
     };
 
     connectWebSocket();
 
     return () => {
-      if (wsConnection.current) {
-        wsConnection.current.close();
+      if (wsConnection) {
+        wsConnection.close();
       }
     };
   }, [reloadCount]);
@@ -242,17 +243,15 @@ function Multiplayer() {
     );
   }
 
-  return roomDetails?.roomId && wsConnection.current ? (
+  return roomDetails?.roomId && wsConnection ? (
     <Room
       roomDetails={roomDetails}
       setRoomDetails={setRoomDetails}
       userId={userId.current}
-      wsConnection={wsConnection.current}
+      wsConnection={wsConnection}
     />
   ) : (
-    wsConnection.current && (
-      <Home userId={userId.current} wsConnection={wsConnection.current} />
-    )
+    wsConnection && <Home userId={userId.current} wsConnection={wsConnection} />
   );
 }
 

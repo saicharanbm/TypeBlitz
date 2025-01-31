@@ -1,4 +1,3 @@
-import { useId } from "react";
 import { Users, wordDifficulty } from "../types";
 import { wordsEasy, wordsMedium, wordsHard } from "./data";
 

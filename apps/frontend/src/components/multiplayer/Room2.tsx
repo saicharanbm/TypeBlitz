@@ -1,4 +1,4 @@
-import { Keyboard, DoorOpen } from "lucide-react";
+import { Keyboard, DoorOpen, Check } from "lucide-react";
 import {
   messageType,
   roomDetailsType,
@@ -201,11 +201,22 @@ function Room({
         </div>
         <div className=" flex flex-col gap-6 text-textPrimary">
           <div className=" p-2 flex flex-col gap-4">
-            <div className="w-full p-3 flex items-center gap-2 justify-center bg-nav rounded-md hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]">
-              <Keyboard />
-              <h3>Start test</h3>
-            </div>
-            <div className="w-full p-2 flex items-center gap-2 justify-center bg-nav rounded-md hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]">
+            {isAdmin.current ? (
+              <div className="w-full p-3 flex items-center gap-2 justify-center bg-nav rounded-md hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]">
+                <Keyboard />
+                <h3>Start game</h3>
+              </div>
+            ) : (
+              <div className="w-full p-3 flex items-center gap-2 justify-center bg-nav rounded-md hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]">
+                <Check />
+                <h3>Ready</h3>
+              </div>
+            )}
+
+            <div
+              className="w-full p-2 flex items-center gap-2 justify-center bg-nav rounded-md hover:bg-textPrimary cursor-pointer hover:text-nav transition-colors duration-[150ms]"
+              onClick={() => wsConnection.close()}
+            >
               <DoorOpen />
               <h3>Leave room</h3>
             </div>
