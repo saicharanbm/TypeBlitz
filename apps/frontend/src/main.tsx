@@ -25,7 +25,8 @@ const router = createBrowserRouter([
 ]);
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
+  // <StrictMode>
+  <>
     <ToastContainer
       position="top-right"
       autoClose={4000}
@@ -40,5 +41,7 @@ createRoot(document.getElementById("root")!).render(
       transition={Zoom}
     />
     <RouterProvider router={router} />
-  </StrictMode>
+  </>
+
+  // </StrictMode>
 );

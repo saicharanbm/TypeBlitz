@@ -1,17 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import Home from "./Home";
-import {
-  firstUserPayload,
-  messageType,
-  roomDetailsType,
-  totalTime,
-  updateUserPayload,
-  wordDifficulty,
-  wsStatus,
-} from "../../types";
+import { roomDetailsType, wsStatus } from "../../types";
 import { v4 as uuid } from "uuid";
-import { toast } from "react-toastify";
-import { ToastStlye } from "../../utils";
+import {
+  addUserList,
+  deleteUser,
+  handleFirstUser,
+  showToastError,
+  updateMessage,
+  updateRoomData,
+  updateUsers,
+} from "../../utils";
 import Room from "./Room";
 import ConnectionError from "./ConnectionError";
 
@@ -25,7 +24,7 @@ function Multiplayer() {
   const [roomDetails, setRoomDetails] = useState<roomDetailsType>();
   const userId = useRef(uuid());
   const connectWebSocket = () => {
-    wsConnection.current = new WebSocket("http://localhost:3001/");
+    wsConnection.current = new WebSocket("ws://localhost:3001/");
     const ws = wsConnection.current;
 
     ws.onopen = () => {
@@ -47,16 +46,18 @@ function Multiplayer() {
         switch (data.type) {
           case "room-created":
           case "room-joined":
-            handleFirstUser(data.payload);
+            handleFirstUser(data.payload, setRoomDetails);
             break;
           case "user-joined":
-            updateUsers(data.payload);
+            updateUsers(data.payload, setRoomDetails);
             break;
-          case "user-left":
-            deleteUser(data.payload);
+          case "user-left": {
+            const { userId, name } = data.payload;
+            deleteUser(userId, name, setRoomDetails);
             break;
+          }
           case "message":
-            updateMessage(data.payload);
+            updateMessage(data.payload, setRoomDetails);
             break;
 
           case "room-doesnot-exist":
@@ -76,15 +77,16 @@ function Multiplayer() {
             showToastError("User has already joined the room.");
             break;
           case "user-list":
-            addUserList(data.payload.users);
+            addUserList(data.payload.users, setRoomDetails);
             break;
           case "room-details-update":
-            updateRoomData(data.payload);
+            updateRoomData(data.payload, setRoomDetails);
             break;
           case "room-closed":
             showToastError("Admin has left the room. Room closed.");
             break;
-
+          case "game-status-start":
+            break;
           default:
             console.warn("Unknown message type:", data.type);
         }
@@ -119,139 +121,6 @@ function Multiplayer() {
       }
     };
   }, [reloadCount]);
-
-  const handleFirstUser = (payload: firstUserPayload) => {
-    const { roomId, name, userId, isAdmin, difficulty, progress, time } =
-      payload;
-
-    if (
-      !roomId ||
-      !name ||
-      !userId ||
-      !difficulty ||
-      !progress ||
-      !time ||
-      typeof isAdmin !== "boolean"
-    ) {
-      console.log("error");
-      showToastError("Something went wrong while creating the room.");
-      return;
-    }
-    showToastSuccess(`Room with id ${roomId} successfully created.`);
-
-    setRoomDetails({
-      roomId,
-      difficulty,
-      time,
-      progress,
-      users: [{ name, userId, isAdmin }],
-      messages: [],
-    });
-  };
-  const addUserList = (payload: updateUserPayload[]) => {
-    setRoomDetails((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        users: [...prev.users, ...payload],
-      };
-    });
-  };
-  const deleteUser = ({ userId, name }: { userId: string; name: string }) => {
-    console.log({ userId, name });
-    setRoomDetails((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        users: prev.users.filter((user) => user.userId !== userId),
-        messages: [
-          ...prev.messages,
-          {
-            id: userId,
-            message: "Left the room.",
-            name,
-            type: messageType.update,
-          },
-        ],
-      };
-    });
-  };
-
-  const updateUsers = (payload: updateUserPayload) => {
-    const { name, userId, isAdmin } = payload;
-    console.log(payload);
-    if (!name || !userId || typeof isAdmin !== "boolean") {
-      showToastError("Something went wrong while adding users.");
-      return;
-    }
-
-    setRoomDetails((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        users: [...prev.users, { name, userId, isAdmin }],
-        messages: [
-          ...prev.messages,
-          {
-            id: userId,
-            message: "Joined the room.",
-            name,
-            type: messageType.update,
-          },
-        ],
-      };
-    });
-  };
-  const updateRoomData = (payload: {
-    difficulty: wordDifficulty;
-    time: totalTime;
-  }) => {
-    const { difficulty, time } = payload;
-    setRoomDetails((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        difficulty,
-        time,
-      };
-    });
-  };
-
-  const updateMessage = (payload: {
-    message: string;
-    userId: string;
-    name: string;
-  }) => {
-    const { message, userId, name } = payload;
-    if (!message || !userId || !name) {
-      return;
-    }
-
-    setRoomDetails((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        messages: [
-          ...prev.messages,
-          {
-            id: userId,
-            message,
-            name,
-            type: messageType.message,
-          },
-        ],
-      };
-    });
-  };
-
-  const showToastError = (message: string) => {
-    toast.dismiss();
-    toast.error(message, ToastStlye);
-  };
-  const showToastSuccess = (message: string) => {
-    toast.dismiss();
-    toast.success(message, ToastStlye);
-  };
 
   if (connectionStatus === wsStatus.error) {
     return (
