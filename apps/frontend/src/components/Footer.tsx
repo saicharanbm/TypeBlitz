@@ -1,5 +1,4 @@
 import { Mail, Github, Twitter, Linkedin } from "lucide-react";
-import { Link } from "react-router-dom";
 function Footer() {
   return (
     <div className="w-full flex gap-2 md:gap-4 lg:gap-6 p-4 justify-center text-textSecondary text-lg font-normal select-none">

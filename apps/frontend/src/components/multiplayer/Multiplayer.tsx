@@ -12,7 +12,7 @@ import {
 import { v4 as uuid } from "uuid";
 import { toast } from "react-toastify";
 import { ToastStlye } from "../../utils";
-import Room from "./Room2";
+import Room from "./Room";
 import ConnectionError from "./ConnectionError";
 
 function Multiplayer() {
@@ -20,94 +20,99 @@ function Multiplayer() {
     wsStatus.loading
   );
   const [reloadCount, setReloadCount] = useState(0);
-  const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
+  const wsConnection = useRef<WebSocket | null>(null);
 
   const [roomDetails, setRoomDetails] = useState<roomDetailsType>();
   const userId = useRef(uuid());
+  const connectWebSocket = () => {
+    wsConnection.current = new WebSocket("http://localhost:3001/");
+    const ws = wsConnection.current;
 
-  useEffect(() => {
-    const connectWebSocket = () => {
-      setWsConnection(new WebSocket("ws://localhost:3001"));
-      if (wsConnection) {
-        wsConnection.onopen = () => {
-          console.log("WebSocket connected");
-          setConnectionStatus(wsStatus.connected);
-          wsConnection.send(
-            JSON.stringify({
-              type: "connect",
-              payload: { userId: userId.current },
-            })
-          );
-        };
+    ws.onopen = () => {
+      console.log("WebSocket connected");
+      setConnectionStatus(wsStatus.connected);
+      ws.send(
+        JSON.stringify({
+          type: "connect",
+          payload: { userId: userId.current },
+        })
+      );
+    };
 
-        wsConnection.onmessage = (response) => {
-          try {
-            const data = JSON.parse(response.data);
-            console.log(data);
+    ws.onmessage = (response) => {
+      try {
+        const data = JSON.parse(response.data);
+        console.log(data);
 
-            switch (data.type) {
-              case "room-created":
-              case "room-joined":
-                handleFirstUser(data.payload);
-                break;
-              case "user-joined":
-                updateUsers(data.payload);
-                break;
-              case "message":
-                updateMessage(data.payload);
-                break;
+        switch (data.type) {
+          case "room-created":
+          case "room-joined":
+            handleFirstUser(data.payload);
+            break;
+          case "user-joined":
+            updateUsers(data.payload);
+            break;
+          case "user-left":
+            deleteUser(data.payload);
+            break;
+          case "message":
+            updateMessage(data.payload);
+            break;
 
-              case "room-doesnot-exist":
-                showToastError(
-                  `There is no room with the id ${data.payload.roomId}`
-                );
-                break;
+          case "room-doesnot-exist":
+            showToastError(
+              `There is no room with the id ${data.payload.roomId}`
+            );
+            break;
 
-              case "invalid-request":
-                showToastError("Please provide all the details.");
-                break;
+          case "invalid-request":
+            showToastError("Please provide all the details.");
+            break;
 
-              case "user-already-in-the-room":
-                showToastError("User has already joined the room.");
-                break;
-              case "user-list":
-                addUserList(data.payload.users);
-                break;
-              case "room-details-update":
-                updateRoomData(data.payload);
-                break;
+          case "user-already-in-the-room":
+            showToastError("User has already joined the room.");
+            break;
+          case "user-list":
+            addUserList(data.payload.users);
+            break;
+          case "room-details-update":
+            updateRoomData(data.payload);
+            break;
+          case "room-closed":
+            showToastError("Admin has left the room. Room closed.");
+            break;
 
-              default:
-                console.warn("Unknown message type:", data.type);
-            }
-          } catch (error) {
-            console.error("Error parsing WebSocket message:", error);
-          }
-        };
-
-        wsConnection.onerror = (error) => {
-          console.error("WebSocket error:", error);
-          setConnectionStatus(wsStatus.error);
-        };
-
-        wsConnection.onclose = () => {
-          console.log("WebSocket closed");
-          if (connectionStatus !== wsStatus.error)
-            setConnectionStatus(wsStatus.error);
-          setWsConnection(null);
-          setRoomDetails(undefined);
-          userId.current = uuid();
-
-          // Retry connection with exponential backoff
-        };
+          default:
+            console.warn("Unknown message type:", data.type);
+        }
+      } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
       }
     };
 
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+      setConnectionStatus(wsStatus.error);
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket closed");
+      if (connectionStatus !== wsStatus.error)
+        setConnectionStatus(wsStatus.error);
+      setRoomDetails(undefined);
+      userId.current = uuid();
+      connectWebSocket();
+
+      // Retry connection with exponential backoff
+    };
+  };
+
+  useEffect(() => {
     connectWebSocket();
 
     return () => {
-      if (wsConnection) {
-        wsConnection.close();
+      if (wsConnection.current) {
+        wsConnection.current.close();
       }
     };
   }, [reloadCount]);
@@ -146,6 +151,25 @@ function Multiplayer() {
       return {
         ...prev,
         users: [...prev.users, ...payload],
+      };
+    });
+  };
+  const deleteUser = ({ userId, name }: { userId: string; name: string }) => {
+    console.log({ userId, name });
+    setRoomDetails((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        users: prev.users.filter((user) => user.userId !== userId),
+        messages: [
+          ...prev.messages,
+          {
+            id: userId,
+            message: "Left the room.",
+            name,
+            type: messageType.update,
+          },
+        ],
       };
     });
   };
@@ -243,15 +267,17 @@ function Multiplayer() {
     );
   }
 
-  return roomDetails?.roomId && wsConnection ? (
+  return roomDetails?.roomId && wsConnection.current ? (
     <Room
       roomDetails={roomDetails}
       setRoomDetails={setRoomDetails}
       userId={userId.current}
-      wsConnection={wsConnection}
+      wsConnection={wsConnection.current}
     />
   ) : (
-    wsConnection && <Home userId={userId.current} wsConnection={wsConnection} />
+    wsConnection.current && (
+      <Home userId={userId.current} wsConnection={wsConnection.current} />
+    )
   );
 }
 

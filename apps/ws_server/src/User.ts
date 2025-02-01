@@ -194,7 +194,8 @@ export class User {
     // do some thing
 
     const RoomManagerInstance = RoomManager.getInstance();
-    if (this.isAdmin) {
+    const progress = RoomManagerInstance.rooms.get(this.roomId)?.progress;
+    if (this.isAdmin && progress === gameProgress.waiting) {
       RoomManagerInstance.deleteRoom(this.roomId, this.id);
       this.ws.close();
       return;
@@ -205,6 +206,7 @@ export class User {
         type: "user-left",
         payload: {
           userId: this.id,
+          name: this.displayName,
         },
       },
       this.id
