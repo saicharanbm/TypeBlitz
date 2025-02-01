@@ -1,18 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Home from "./Home";
-import { roomDetailsType, wsStatus } from "../../types";
+import { GameState, letterType, roomDetailsType, wsStatus } from "../../types";
 import { v4 as uuid } from "uuid";
 import {
   addUserList,
   deleteUser,
   handleFirstUser,
   showToastError,
+  showToastSuccess,
   updateMessage,
   updateRoomData,
   updateUsers,
 } from "../../utils";
 import Room from "./Room";
 import ConnectionError from "./ConnectionError";
+import GameArea from "./GameArea";
 
 function Multiplayer() {
   const [connectionStatus, setConnectionStatus] = useState<wsStatus>(
@@ -20,8 +22,10 @@ function Multiplayer() {
   );
   const [reloadCount, setReloadCount] = useState(0);
   const wsConnection = useRef<WebSocket | null>(null);
-
   const [roomDetails, setRoomDetails] = useState<roomDetailsType>();
+
+  const [gameData, setGameData] = useState<GameState>();
+
   const userId = useRef(uuid());
   const connectWebSocket = () => {
     wsConnection.current = new WebSocket("ws://localhost:3001/");
@@ -85,8 +89,13 @@ function Multiplayer() {
           case "room-closed":
             showToastError("Admin has left the room. Room closed.");
             break;
-          case "game-status-start":
+          case "game-status-start": {
+            const { message, words } = data.payload;
+            console.log("Initializing Game");
+            initializeGame(words);
+            showToastSuccess(message);
             break;
+          }
           default:
             console.warn("Unknown message type:", data.type);
         }
@@ -122,6 +131,27 @@ function Multiplayer() {
     };
   }, [reloadCount]);
 
+  const initializeGame = useCallback((words: string[]): void => {
+    console.log(roomDetails);
+    if (!roomDetails) return;
+    const newWords = words.map((word) =>
+      word.split("").map((letter) => ({ letter, type: letterType.normal }))
+    );
+
+    console.log("Game Starts");
+
+    setGameData({
+      words: newWords,
+      originalWords: words,
+      currentWordIndex: 0,
+      currentLetterIndex: 0,
+      gameStatus: "waiting",
+      timeLeft: roomDetails.time,
+      focus: true,
+      wpm: 0,
+    });
+  }, []);
+
   if (connectionStatus === wsStatus.error) {
     return (
       <ConnectionError
@@ -136,6 +166,15 @@ function Multiplayer() {
       <div className="w-full p-28 flex flex-col items-center justify-center">
         <p>Loading...</p>
       </div>
+    );
+  }
+  if (gameData) {
+    return (
+      <GameArea
+        gameData={gameData}
+        setGameData={setGameData}
+        time={roomDetails?.time || 60}
+      />
     );
   }
 

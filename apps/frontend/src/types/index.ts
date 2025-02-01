@@ -1,4 +1,4 @@
-export interface GameState {
+export type GameState = {
   words: LetterInfo[][];
   originalWords: string[];
   currentWordIndex: number;
@@ -7,7 +7,7 @@ export interface GameState {
   timeLeft: number;
   focus: boolean;
   wpm: number;
-}
+};
 
 export interface LetterInfo {
   letter: string;

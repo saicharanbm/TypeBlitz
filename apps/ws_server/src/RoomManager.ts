@@ -41,7 +41,7 @@ export class RoomManager {
       roomData.difficulty = difficulty;
       roomData.time = time;
       roomData.words = Array.from({ length: 200 }, (_, id) => {
-        return getRandomWord(wordDifficulty.easy);
+        return getRandomWord(difficulty);
       });
     }
   }
