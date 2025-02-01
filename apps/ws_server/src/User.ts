@@ -184,7 +184,20 @@ export class User {
           });
           break;
         }
-        case "leave-room": {
+        case "start-game": {
+          const RoomManagerInstance = RoomManager.getInstance();
+          if (!this.isAdmin) {
+            this.sendMessage({
+              type: "invalid-request",
+              payload: { message: "You are not authorized to start game." },
+            });
+            return;
+          }
+
+          //change the progress from waiting to starting
+
+          RoomManagerInstance.startGame(this.roomId, this);
+
           break;
         }
       }

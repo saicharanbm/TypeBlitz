@@ -65,9 +65,12 @@ function Multiplayer() {
             );
             break;
 
-          case "invalid-request":
-            showToastError("Please provide all the details.");
+          case "invalid-request": {
+            const { message } = data.payload;
+
+            showToastError(message || "Plesae provide all the details.");
             break;
+          }
 
           case "user-already-in-the-room":
             showToastError("User has already joined the room.");

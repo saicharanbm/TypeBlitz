@@ -40,6 +40,9 @@ export class RoomManager {
     if (roomData) {
       roomData.difficulty = difficulty;
       roomData.time = time;
+      roomData.words = Array.from({ length: 200 }, (_, id) => {
+        return getRandomWord(wordDifficulty.easy);
+      });
     }
   }
 
@@ -93,11 +96,62 @@ export class RoomManager {
     this.rooms.delete(roomId);
   }
 
+  startGame(roomId: string, user: User) {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      return;
+    }
+    if (room.users.length < 2) {
+      user.sendMessage({
+        type: "invalid-request",
+        payload: {
+          message: "There should be atleast 2 people in the group.",
+        },
+      });
+      return;
+    }
+    room.progress = gameProgress.starting;
+    this.broadcastMessage(roomId, {
+      type: "game-status-start",
+      payload: { message: "The game starts in 10 seconds!", words: room.words },
+    });
+    // Countdown from 10 seconds
+    let countdown = 10;
+    const countdownInterval = setInterval(() => {
+      // Notify users about the countdown
+      this.broadcastMessage(roomId, {
+        type: "countdown",
+        payload: { secondsLeft: countdown },
+      });
+
+      countdown--;
+
+      if (countdown < 0) {
+        clearInterval(countdownInterval);
+        // Set the game progress to playing
+        room.progress = gameProgress.playing;
+
+        this.broadcastMessage(roomId, {
+          type: "game-status-play",
+          payload: { message: "The game has started!", words: room.words },
+        });
+
+        // Game duration of 60 seconds
+        setTimeout(() => {
+          room.progress = gameProgress.finished;
+          this.broadcastMessage(roomId, {
+            type: "game-finished",
+            payload: { message: "The game has finished." },
+          });
+        }, room.time * 1000);
+      }
+    }, 1000);
+  }
+
   createRoom(user: User) {
     const roomId = generateRoomId();
     const words = Array.from({ length: 200 }, (_, id) => {
-      const word = getRandomWord(wordDifficulty.easy);
-      return id === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word;
+      return getRandomWord(wordDifficulty.easy);
     });
     const data: roomDetails = {
       words,
@@ -112,14 +166,20 @@ export class RoomManager {
     return roomId;
   }
 
-  broadcastMessage(roomId: string, message: any, userId: string) {
+  broadcastMessage(roomId: string, message: any, userId?: string) {
     const data = this.rooms.get(roomId);
     const users = data?.users;
     if (users) {
+      if (userId && userId.trim()) {
+        users.forEach((user) => {
+          if (user.id !== userId) {
+            user.sendMessage(message);
+          }
+        });
+        return;
+      }
       users.forEach((user) => {
-        if (user.id !== userId) {
-          user.sendMessage(message);
-        }
+        user.sendMessage(message);
       });
     }
   }
