@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Home from "./Home";
 import { GameState, letterType, roomDetailsType, wsStatus } from "../../types";
 import { v4 as uuid } from "uuid";
@@ -23,10 +23,11 @@ function Multiplayer() {
   const [reloadCount, setReloadCount] = useState(0);
   const wsConnection = useRef<WebSocket | null>(null);
   const [roomDetails, setRoomDetails] = useState<roomDetailsType>();
-
+  const roomDetailsRef = useRef<roomDetailsType>();
   const [gameData, setGameData] = useState<GameState>();
-
+  const [timer, setTimer] = useState<number>(10);
   const userId = useRef(uuid());
+
   const connectWebSocket = () => {
     wsConnection.current = new WebSocket("ws://localhost:3001/");
     const ws = wsConnection.current;
@@ -91,9 +92,23 @@ function Multiplayer() {
             break;
           case "game-status-start": {
             const { message, words } = data.payload;
-            console.log("Initializing Game");
             initializeGame(words);
             showToastSuccess(message);
+            break;
+          }
+          case "countdown": {
+            const { secondsLeft } = data.payload;
+            if (secondsLeft) setTimer(secondsLeft);
+            break;
+          }
+          case "game-status-play": {
+            setGameData((prev) => {
+              if (!prev) return;
+              return {
+                ...prev,
+                gameStatus: "playing",
+              };
+            });
             break;
           }
           default:
@@ -114,6 +129,7 @@ function Multiplayer() {
       if (connectionStatus !== wsStatus.error)
         setConnectionStatus(wsStatus.error);
       setRoomDetails(undefined);
+      setGameData(undefined);
       userId.current = uuid();
       connectWebSocket();
 
@@ -131,14 +147,20 @@ function Multiplayer() {
     };
   }, [reloadCount]);
 
-  const initializeGame = useCallback((words: string[]): void => {
-    console.log(roomDetails);
-    if (!roomDetails) return;
+  // Update the ref whenever roomDetails changes as this will let us access roomDetails inside the ws closure
+  useEffect(() => {
+    roomDetailsRef.current = roomDetails;
+  }, [roomDetails]);
+
+  const initializeGame = (words: string[]): void => {
+    const currentRoomDetails = roomDetailsRef.current;
+    console.log("Current room details from ref:", currentRoomDetails);
+
+    if (!currentRoomDetails) return;
+
     const newWords = words.map((word) =>
       word.split("").map((letter) => ({ letter, type: letterType.normal }))
     );
-
-    console.log("Game Starts");
 
     setGameData({
       words: newWords,
@@ -146,11 +168,11 @@ function Multiplayer() {
       currentWordIndex: 0,
       currentLetterIndex: 0,
       gameStatus: "waiting",
-      timeLeft: roomDetails.time,
+      timeLeft: currentRoomDetails.time,
       focus: true,
       wpm: 0,
     });
-  }, []);
+  };
 
   if (connectionStatus === wsStatus.error) {
     return (
@@ -168,12 +190,14 @@ function Multiplayer() {
       </div>
     );
   }
-  if (gameData) {
+  if (gameData && wsConnection.current) {
     return (
       <GameArea
         gameData={gameData}
         setGameData={setGameData}
-        time={roomDetails?.time || 60}
+        timer={timer}
+        wsConnection={wsConnection.current}
+        totalTime={roomDetails?.time || 60}
       />
     );
   }

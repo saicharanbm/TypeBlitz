@@ -116,7 +116,7 @@ export class RoomManager {
       payload: { message: "The game starts in 10 seconds!", words: room.words },
     });
     // Countdown from 10 seconds
-    let countdown = 10;
+    let countdown = 5;
     const countdownInterval = setInterval(() => {
       // Notify users about the countdown
       this.broadcastMessage(roomId, {
@@ -133,7 +133,7 @@ export class RoomManager {
 
         this.broadcastMessage(roomId, {
           type: "game-status-play",
-          payload: { message: "The game has started!", words: room.words },
+          payload: { message: "The game has started!" },
         });
 
         // Game duration of 60 seconds
@@ -145,7 +145,7 @@ export class RoomManager {
           });
         }, room.time * 1000);
       }
-    }, 1000);
+    }, 5000);
   }
 
   createRoom(user: User) {

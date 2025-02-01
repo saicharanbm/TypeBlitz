@@ -1,22 +1,22 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { GameState, letterType } from "../../types";
 
 function GameArea({
   gameData,
   setGameData,
-
-  time,
+  wsConnection,
+  timer,
+  totalTime,
 }: {
   gameData: GameState;
   setGameData: React.Dispatch<React.SetStateAction<GameState | undefined>>;
-
-  time: number;
+  wsConnection: WebSocket;
+  timer: number;
+  totalTime: number;
 }) {
   const gameRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    // initializeGame();
-
     const checkFocus = () => {
       if (gameRef.current === document.activeElement) {
         setGameData((prev) => {
@@ -81,7 +81,7 @@ function GameArea({
         if (!prev) return prev;
         return {
           ...prev,
-          wpm: Math.round(wordsTyped / (time / 60) || 0),
+          wpm: Math.round(wordsTyped / (totalTime / 60) || 0),
         };
       });
     }
@@ -209,7 +209,9 @@ function GameArea({
         <div className="text-yellow-400 text-xl">
           {gameData.gameStatus === "finished"
             ? `WPM: ${gameData.wpm}`
-            : gameData.timeLeft}
+            : gameData.gameStatus === "waiting"
+              ? `Starts in : ${timer}`
+              : gameData.timeLeft}
         </div>
       </div>
       <div
