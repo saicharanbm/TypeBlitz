@@ -8,6 +8,7 @@ import {
 } from "../types";
 import { RotateCw } from "lucide-react";
 import { getRandomWord } from "../utils";
+import TypingGraph from "./TypingGraph";
 
 function GameArea() {
   const GAME_TIME = useRef<number>(30); // Time in seconds
@@ -49,6 +50,12 @@ function GameArea() {
       timeLeft: GAME_TIME.current,
       focus: true,
       wpm: 0,
+    });
+    setTypingState({
+      startTimestamp: null,
+      endTimestamp: null,
+      letterDetails: [],
+      correctLetterCount: 0,
     });
 
     gameRef.current?.focus();
@@ -142,36 +149,47 @@ function GameArea() {
         letterDetails: [],
       }));
     }
-    if (!typingState.startTimestamp && !typingState.endTimestamp) return;
+    // if (!typingState.startTimestamp && !typingState.endTimestamp) return;
 
     const currentWord = gameState.words[gameState.currentWordIndex];
     if (!currentWord) return;
 
+    const timestamp = typingState.startTimestamp
+      ? Date.now() - typingState.startTimestamp
+      : 0;
+
     if (isLetter) {
       const currentLetter = currentWord[gameState.currentLetterIndex];
+      let type: LetterDetailType = LetterDetailType.correct;
 
       if (!currentLetter) {
         currentWord.push({ letter: key, type: letterType.extra });
-
-        setTypingState((prev) => ({
-          ...prev,
-          letterDetails: [
-            ...prev.letterDetails,
-            {
-              letter: key,
-              type: LetterDetailType.extra,
-              timestamp: prev.startTimestamp
-                ? Date.now() - prev.startTimestamp
-                : 0,
-            },
-          ],
-        }));
+        type = LetterDetailType.extra;
       } else if (currentLetter.letter === key) {
         currentLetter.type = letterType.correct;
       } else {
         currentLetter.type = letterType.incorrect;
+        type = LetterDetailType.incorrect;
       }
 
+      //update the typed key details
+      setTypingState((prev) => ({
+        ...prev,
+        letterDetails: [
+          ...prev.letterDetails,
+          {
+            letter: key,
+            type,
+            timestamp,
+          },
+        ],
+        correctLetterCount:
+          type === LetterDetailType.correct
+            ? prev.correctLetterCount + 1
+            : prev.correctLetterCount,
+      }));
+
+      //update words with its currosponding classes and update the current letter index
       setGameState((prev) => {
         const updatedWords = [...prev.words];
         updatedWords[prev.currentWordIndex] = currentWord;
@@ -189,6 +207,18 @@ function GameArea() {
         gameState.currentLetterIndex >=
         gameState.words[gameState.currentWordIndex].length
       ) {
+        //update the typed key details
+        setTypingState((prev) => ({
+          ...prev,
+          letterDetails: [
+            ...prev.letterDetails,
+            {
+              letter: "Space",
+              type: LetterDetailType.next,
+              timestamp,
+            },
+          ],
+        }));
         setGameState((prev) => ({
           ...prev,
           currentWordIndex: prev.currentWordIndex + 1,
@@ -198,6 +228,18 @@ function GameArea() {
       }
       const currentLetter = currentWord[gameState.currentLetterIndex];
       currentLetter.type = letterType.incorrect;
+      //update the typed key details
+      setTypingState((prev) => ({
+        ...prev,
+        letterDetails: [
+          ...prev.letterDetails,
+          {
+            letter: "Space",
+            type: LetterDetailType.incorrect,
+            timestamp,
+          },
+        ],
+      }));
       setGameState((prev) => {
         const updatedWords = [...prev.words];
         updatedWords[prev.currentWordIndex] = currentWord;
@@ -214,6 +256,19 @@ function GameArea() {
       const currentLetterIndex = gameState.currentLetterIndex - 1;
 
       if (currentLetterIndex < 0 && gameState.currentWordIndex === 0) return;
+      const addRemoveRecordToTypingState = (type: LetterDetailType) => {
+        setTypingState((prev) => ({
+          ...prev,
+          letterDetails: [
+            ...prev.letterDetails,
+            {
+              letter: "BackSpace",
+              type,
+              timestamp,
+            },
+          ],
+        }));
+      };
 
       if (currentLetterIndex >= 0) {
         if (
@@ -233,6 +288,7 @@ function GameArea() {
               currentLetterIndex: prev.currentLetterIndex - 1,
             };
           });
+          addRemoveRecordToTypingState(LetterDetailType.removeExtra);
           return;
         }
 
@@ -253,8 +309,10 @@ function GameArea() {
             currentLetterIndex: prev.currentLetterIndex - 1,
           };
         });
+        addRemoveRecordToTypingState(LetterDetailType.remove);
         return;
       }
+      addRemoveRecordToTypingState(LetterDetailType.previous);
       setGameState((prev) => ({
         ...prev,
         currentWordIndex: prev.currentWordIndex - 1,
@@ -411,6 +469,21 @@ function GameArea() {
       >
         <RotateCw size={28} strokeWidth={3} />
       </div>
+      {gameState.gameStatus === "finished" && (
+        <TypingGraph typingState={typingState} />
+        // <div>
+        //   {typingState.letterDetails.map((details, id) => (
+        //     <div key={id} className="flex gap-2">
+        //       <span className="text-textPrimary">{details.type}</span>
+
+        //       <span className="text-textSecondary">{details.letter}</span>
+        //       <span className="text-primaryColorover ">
+        //         {details.timestamp}
+        //       </span>
+        //     </div>
+        //   ))}
+        // </div>
+      )}
     </div>
   );
 }

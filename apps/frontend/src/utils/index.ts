@@ -1,9 +1,11 @@
 import { toast } from "react-toastify";
 import {
   firstUserPayload,
+  LetterDetailType,
   messageType,
   roomDetailsType,
   totalTime,
+  TypingState,
   updateUserPayload,
   Users,
   wordDifficulty,
@@ -16,6 +18,56 @@ export const ToastStlye = {
     color: "#d1d0c5",
     border: "1px solid #d1d0c5",
   }, // Custom background and text color
+};
+export const processTypingData = (typingState: TypingState) => {
+  if (!typingState.startTimestamp || !typingState.endTimestamp) return [];
+
+  const totalDuration =
+    (typingState.endTimestamp - typingState.startTimestamp) / 1000; // in seconds
+  const interval = 1; // 1-second intervals
+  const totalIntervals = Math.ceil(totalDuration / interval);
+  const time = Math.round(
+    (typingState.endTimestamp - typingState.startTimestamp) / 1000
+  );
+  const result = {
+    totalTime: time,
+    totalWPM: typingState.correctLetterCount
+      ? typingState.correctLetterCount / 5 / (time / 60)
+      : 0,
+    graphData: [],
+  };
+  const wpmData: { time: number; wpm: number; errors: number }[] = [];
+  let correctLetters = 0;
+  let errors = 0;
+
+  for (let i = 0; i <= totalIntervals; i++) {
+    const currentTime = typingState.startTimestamp + i * interval * 1000;
+
+    // Filter letters typed up to current time
+    const lettersSoFar = typingState.letterDetails.filter(
+      (ld) => ld.timestamp <= currentTime
+    );
+
+    correctLetters = lettersSoFar.filter(
+      (ld) => ld.type === LetterDetailType.correct
+    ).length;
+    errors = lettersSoFar.filter(
+      (ld) =>
+        ld.type === LetterDetailType.incorrect ||
+        ld.type === LetterDetailType.extra
+    ).length;
+
+    const wordsTyped = correctLetters / 5;
+    const wpm = (wordsTyped / (i + 1)) * 60; // WPM calculation
+
+    wpmData.push({
+      time: i + 1,
+      wpm: Math.round(wpm),
+      errors: errors,
+    });
+  }
+
+  return wpmData;
 };
 
 export const getRandomWord = (wordType: wordDifficulty): string => {
