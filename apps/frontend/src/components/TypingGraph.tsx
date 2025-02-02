@@ -83,7 +83,7 @@ const TypingGraph = ({
     // </div>
     // <div>Some thing went wrong</div>
     <div className="w-full h-96 p-4 flex ">
-      <div className=" pr-4  pt-5 flex flex-col justify-between">
+      <div className=" pr-4 pt-7 flex flex-col gap-5">
         <div className="text-center">
           <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-textSecondary">
             wpm
@@ -97,16 +97,21 @@ const TypingGraph = ({
             acc
           </h3>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primaryColor">
-            {typingData?.totalWPM}
+            {Math.round(
+              (typingState.correctLetterCount /
+                (typingState.correctLetterCount + typingState.errorCount)) *
+                100
+            )}
+            %
           </h1>
         </div>
-        <div className="text-base md:text-lg  text-center">
+        {/* <div className="text-base md:text-lg  text-center">
           <p className=" text-textSecondary">test type</p>
           <p className="text-primaryColor">time {totalTime}</p>
           <p className="text-primaryColor inline-block">
             difficulty {difficulty}
           </p>
-        </div>
+        </div> */}
       </div>
       <div className="w-full flex flex-col">
         <ResponsiveContainer width="100%" height="85%">
@@ -181,8 +186,8 @@ const TypingGraph = ({
             <h1 className="md:text-3xl text-primaryColor">{`${typingState.correctLetterCount + typingState.errorCount}/${typingState.correctLetterCount}/${typingState.errorCount}`}</h1>
           </div>
           <div className="text-center">
-            <h3>consistency</h3>
-            <h1 className="md:text-3xl text-primaryColor">{`${40}%`}</h1>
+            <h3>type</h3>
+            <h1 className="md:text-3xl text-primaryColor">{difficulty}</h1>
           </div>
           <div className="text-center">
             <h3>time</h3>

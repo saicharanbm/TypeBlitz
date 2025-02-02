@@ -224,6 +224,7 @@ function GameArea() {
               timestamp,
             },
           ],
+          correctLetterCount: prev.correctLetterCount + 1,
         }));
         setGameState((prev) => ({
           ...prev,
@@ -274,6 +275,7 @@ function GameArea() {
               timestamp,
             },
           ],
+          errorCount: prev.errorCount + 1,
         }));
       };
 

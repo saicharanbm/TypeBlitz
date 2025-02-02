@@ -54,16 +54,16 @@ export const processTypingData = (
     const currentTime = Math.ceil(data.timestamp / 1000);
     const index = Math.min(currentTime, totalDuration) - 1;
 
-    if (data.type === LetterDetailType.correct) {
-      result.graphData[index].rawCount += 1;
-      result.graphData[index].correctCount += 1;
-    } else if (
-      data.type === LetterDetailType.incorrect ||
-      data.type === LetterDetailType.extra
+    if (
+      data.type === LetterDetailType.correct ||
+      data.type === LetterDetailType.next
     ) {
       result.graphData[index].rawCount += 1;
-      result.graphData[index].errorCount += 1;
+      result.graphData[index].correctCount += 1;
+      return;
     }
+    result.graphData[index].rawCount += 1;
+    result.graphData[index].errorCount += 1;
   });
 
   result.graphData.forEach((element) => {
