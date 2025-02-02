@@ -18,6 +18,7 @@ export type TypingState = {
   endTimestamp: number | null;
   letterDetails: LetterDetail[];
   correctLetterCount: number;
+  errorCount: number;
 };
 type LetterDetail = {
   type: LetterDetailType;

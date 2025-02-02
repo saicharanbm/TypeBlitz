@@ -29,6 +29,7 @@ function GameArea() {
     endTimestamp: null,
     letterDetails: [],
     correctLetterCount: 0,
+    errorCount: 0,
   });
 
   const gameRef = useRef<HTMLDivElement | null>(null);
@@ -56,6 +57,7 @@ function GameArea() {
       endTimestamp: null,
       letterDetails: [],
       correctLetterCount: 0,
+      errorCount: 0,
     });
 
     gameRef.current?.focus();
@@ -156,7 +158,7 @@ function GameArea() {
 
     const timestamp = typingState.startTimestamp
       ? Date.now() - typingState.startTimestamp
-      : 0;
+      : 1;
 
     if (isLetter) {
       const currentLetter = currentWord[gameState.currentLetterIndex];
@@ -187,6 +189,10 @@ function GameArea() {
           type === LetterDetailType.correct
             ? prev.correctLetterCount + 1
             : prev.correctLetterCount,
+        errorCount:
+          type !== LetterDetailType.correct
+            ? prev.errorCount + 1
+            : prev.errorCount,
       }));
 
       //update words with its currosponding classes and update the current letter index
@@ -239,6 +245,7 @@ function GameArea() {
             timestamp,
           },
         ],
+        errorCount: prev.errorCount + 1,
       }));
       setGameState((prev) => {
         const updatedWords = [...prev.words];

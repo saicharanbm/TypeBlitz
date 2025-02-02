@@ -19,55 +19,66 @@ export const ToastStlye = {
     border: "1px solid #d1d0c5",
   }, // Custom background and text color
 };
-export const processTypingData = (typingState: TypingState) => {
-  if (!typingState.startTimestamp || !typingState.endTimestamp) return [];
-
-  const totalDuration =
-    (typingState.endTimestamp - typingState.startTimestamp) / 1000; // in seconds
-  const interval = 1; // 1-second intervals
-  const totalIntervals = Math.ceil(totalDuration / interval);
-  const time = Math.round(
-    (typingState.endTimestamp - typingState.startTimestamp) / 1000
-  );
-  const result = {
-    totalTime: time,
-    totalWPM: typingState.correctLetterCount
-      ? typingState.correctLetterCount / 5 / (time / 60)
-      : 0,
-    graphData: [],
-  };
-  const wpmData: { time: number; wpm: number; errors: number }[] = [];
-  let correctLetters = 0;
-  let errors = 0;
-
-  for (let i = 0; i <= totalIntervals; i++) {
-    const currentTime = typingState.startTimestamp + i * interval * 1000;
-
-    // Filter letters typed up to current time
-    const lettersSoFar = typingState.letterDetails.filter(
-      (ld) => ld.timestamp <= currentTime
-    );
-
-    correctLetters = lettersSoFar.filter(
-      (ld) => ld.type === LetterDetailType.correct
-    ).length;
-    errors = lettersSoFar.filter(
-      (ld) =>
-        ld.type === LetterDetailType.incorrect ||
-        ld.type === LetterDetailType.extra
-    ).length;
-
-    const wordsTyped = correctLetters / 5;
-    const wpm = (wordsTyped / (i + 1)) * 60; // WPM calculation
-
-    wpmData.push({
-      time: i + 1,
-      wpm: Math.round(wpm),
-      errors: errors,
-    });
+export const processTypingData = (
+  typingState: TypingState,
+  totalDuration: number
+) => {
+  if (
+    !typingState.startTimestamp ||
+    !typingState.endTimestamp ||
+    totalDuration <= 0
+  ) {
+    return [];
   }
 
-  return wpmData;
+  const result: {
+    totalTime: number;
+    totalWPM: number;
+    graphData: {
+      time: number;
+      correctCount: number;
+      rawCount: number;
+      correctWPM: number;
+      rawWPM: number;
+      errorCount: number;
+    }[];
+  } = {
+    totalTime: totalDuration,
+    totalWPM: typingState.correctLetterCount
+      ? typingState.correctLetterCount / 5 / (totalDuration / 60)
+      : 0,
+    graphData: Array.from({ length: totalDuration }).map((_, id) => {
+      return {
+        time: id + 1,
+        correctCount: 0,
+        rawCount: 0,
+        errorCount: 0,
+        correctWPM: 0,
+        rawWPM: 0,
+      };
+    }),
+  };
+
+  typingState.letterDetails.forEach((data) => {
+    const currentTime = Math.ceil(data.timestamp / 1000);
+    const index = Math.min(currentTime, totalDuration) - 1;
+    result.graphData[index].rawCount += 1;
+
+    if (data.letter === LetterDetailType.correct) {
+      result.graphData[index].correctCount += 1;
+    } else if (
+      data.letter === LetterDetailType.incorrect ||
+      data.letter === LetterDetailType.extra
+    ) {
+      result.graphData[index].errorCount += 1;
+    }
+  });
+  result.graphData.forEach((element) => {
+    element.correctWPM = (element.correctCount * 60) / 5;
+    element.rawWPM = (element.rawCount * 60) / 5;
+  });
+
+  return result;
 };
 
 export const getRandomWord = (wordType: wordDifficulty): string => {
