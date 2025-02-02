@@ -28,60 +28,51 @@ export const processTypingData = (
     !typingState.endTimestamp ||
     totalDuration <= 0
   ) {
+    console.log("Invalid input data:", { typingState, totalDuration });
     return;
   }
 
-  const result: {
-    totalTime: number;
-    totalWPM: number;
-    graphData: {
-      time: number;
-      correctCount: number;
-      rawCount: number;
-      correctWPM: number;
-      rawWPM: number;
-      errorCount: number;
-    }[];
-  } = {
+  const result = {
     totalTime: totalDuration,
     totalWPM: typingState.correctLetterCount
       ? typingState.correctLetterCount / 5 / (totalDuration / 60)
       : 0,
-    graphData: Array.from({ length: totalDuration }).map((_, id) => {
-      return {
-        time: id + 1,
-        correctCount: 0,
-        rawCount: 0,
-        errorCount: 0,
-        correctWPM: 0,
-        rawWPM: 0,
-      };
-    }),
+    graphData: Array.from({ length: totalDuration }).map((_, id) => ({
+      time: id + 1,
+      correctCount: 0,
+      rawCount: 0,
+      errorCount: 0,
+      correctWPM: 0,
+      rawWPM: 0,
+    })),
   };
-  console.log("data", typingState);
+
+  // Log input data in a more readable way
+  console.log("Input typing state:", JSON.stringify(typingState, null, 2));
 
   typingState.letterDetails.forEach((data) => {
     const currentTime = Math.ceil(data.timestamp / 1000);
     const index = Math.min(currentTime, totalDuration) - 1;
 
-    if (data.letter === LetterDetailType.correct) {
+    if (data.type === LetterDetailType.correct) {
       result.graphData[index].rawCount += 1;
-
       result.graphData[index].correctCount += 1;
     } else if (
-      data.letter === LetterDetailType.incorrect ||
-      data.letter === LetterDetailType.extra
+      data.type === LetterDetailType.incorrect ||
+      data.type === LetterDetailType.extra
     ) {
       result.graphData[index].rawCount += 1;
-
       result.graphData[index].errorCount += 1;
     }
   });
+
   result.graphData.forEach((element) => {
     element.correctWPM = (element.correctCount * 60) / 5;
     element.rawWPM = (element.rawCount * 60) / 5;
   });
-  console.log(result);
+
+  // Log final result in a more readable way
+  console.log("Processed result:", JSON.stringify(result, null, 2));
 
   return result;
 };
