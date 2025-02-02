@@ -1,5 +1,11 @@
 import { useRef, useState, useCallback, useEffect } from "react";
-import { GameState, letterType, wordDifficulty } from "../types";
+import {
+  GameState,
+  LetterDetailType,
+  letterType,
+  TypingState,
+  wordDifficulty,
+} from "../types";
 import { RotateCw } from "lucide-react";
 import { getRandomWord } from "../utils";
 
@@ -17,12 +23,18 @@ function GameArea() {
     focus: false,
     wpm: 0,
   });
+  const [typingState, setTypingState] = useState<TypingState>({
+    startTimestamp: null,
+    endTimestamp: null,
+    letterDetails: [],
+    correctLetterCount: 0,
+  });
+
   const gameRef = useRef<HTMLDivElement | null>(null);
 
   const initializeGame = useCallback((): void => {
-    const newOriginalWords = Array.from({ length: 200 }, (_, id) => {
-      const word = getRandomWord(GAME_DIFFICULTY.current);
-      return id === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word;
+    const newOriginalWords = Array.from({ length: 200 }, () => {
+      return getRandomWord(GAME_DIFFICULTY.current);
     });
     const newWords = newOriginalWords.map((word) =>
       word.split("").map((letter) => ({ letter, type: letterType.normal }))
@@ -38,6 +50,7 @@ function GameArea() {
       focus: true,
       wpm: 0,
     });
+
     gameRef.current?.focus();
   }, []);
 
@@ -116,8 +129,20 @@ function GameArea() {
     const isBackspace = key === "Backspace";
 
     if (gameState.gameStatus === "waiting" && isLetter) {
-      setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
+      setGameState((prev) => ({
+        ...prev,
+        gameStatus: "playing",
+        startTimestamp: Date.now(),
+        endTimestamp: Date.now() + GAME_TIME.current * 1000,
+      }));
+      setTypingState((prev) => ({
+        ...prev,
+        startTimestamp: Date.now(),
+        endTimestamp: Date.now() + GAME_TIME.current * 1000,
+        letterDetails: [],
+      }));
     }
+    if (!typingState.startTimestamp && !typingState.endTimestamp) return;
 
     const currentWord = gameState.words[gameState.currentWordIndex];
     if (!currentWord) return;
@@ -127,6 +152,20 @@ function GameArea() {
 
       if (!currentLetter) {
         currentWord.push({ letter: key, type: letterType.extra });
+
+        setTypingState((prev) => ({
+          ...prev,
+          letterDetails: [
+            ...prev.letterDetails,
+            {
+              letter: key,
+              type: LetterDetailType.extra,
+              timestamp: prev.startTimestamp
+                ? Date.now() - prev.startTimestamp
+                : 0,
+            },
+          ],
+        }));
       } else if (currentLetter.letter === key) {
         currentLetter.type = letterType.correct;
       } else {
@@ -142,6 +181,7 @@ function GameArea() {
           currentLetterIndex: prev.currentLetterIndex + 1,
         };
       });
+      return;
     }
 
     if (isSpace) {
@@ -156,6 +196,18 @@ function GameArea() {
         }));
         return;
       }
+      const currentLetter = currentWord[gameState.currentLetterIndex];
+      currentLetter.type = letterType.incorrect;
+      setGameState((prev) => {
+        const updatedWords = [...prev.words];
+        updatedWords[prev.currentWordIndex] = currentWord;
+        return {
+          ...prev,
+          words: updatedWords,
+          currentLetterIndex: prev.currentLetterIndex + 1,
+        };
+      });
+      return;
     }
 
     if (isBackspace) {

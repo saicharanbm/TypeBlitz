@@ -8,10 +8,27 @@ export type GameState = {
   focus: boolean;
   wpm: number;
 };
+export type TypingState = {
+  startTimestamp: number | null;
+  endTimestamp: number | null;
+  letterDetails: LetterDetail[];
+  correctLetterCount: number;
+};
 
 export interface LetterInfo {
   letter: string;
   type: letterType;
+}
+type LetterDetail = {
+  type: LetterDetailType;
+  timestamp: number;
+  letter: string;
+};
+export enum LetterDetailType {
+  correct = "correct",
+  incorrect = "incorrect",
+  next = "next",
+  extra = "extra",
 }
 
 export enum letterType {
