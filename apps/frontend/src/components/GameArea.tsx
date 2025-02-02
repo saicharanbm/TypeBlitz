@@ -477,7 +477,7 @@ function GameArea() {
         <RotateCw size={28} strokeWidth={3} />
       </div>
       {gameState.gameStatus === "finished" && (
-        <TypingGraph typingState={typingState} />
+        <TypingGraph typingState={typingState} totalTime={GAME_TIME.current} />
         // <div>
         //   {typingState.letterDetails.map((details, id) => (
         //     <div key={id} className="flex gap-2">

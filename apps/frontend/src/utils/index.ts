@@ -28,7 +28,7 @@ export const processTypingData = (
     !typingState.endTimestamp ||
     totalDuration <= 0
   ) {
-    return [];
+    return;
   }
 
   const result: {
@@ -58,18 +58,22 @@ export const processTypingData = (
       };
     }),
   };
+  console.log("data", typingState);
 
   typingState.letterDetails.forEach((data) => {
     const currentTime = Math.ceil(data.timestamp / 1000);
     const index = Math.min(currentTime, totalDuration) - 1;
-    result.graphData[index].rawCount += 1;
 
     if (data.letter === LetterDetailType.correct) {
+      result.graphData[index].rawCount += 1;
+
       result.graphData[index].correctCount += 1;
     } else if (
       data.letter === LetterDetailType.incorrect ||
       data.letter === LetterDetailType.extra
     ) {
+      result.graphData[index].rawCount += 1;
+
       result.graphData[index].errorCount += 1;
     }
   });
@@ -77,6 +81,7 @@ export const processTypingData = (
     element.correctWPM = (element.correctCount * 60) / 5;
     element.rawWPM = (element.rawCount * 60) / 5;
   });
+  console.log(result);
 
   return result;
 };
