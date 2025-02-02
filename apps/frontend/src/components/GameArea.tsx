@@ -9,6 +9,7 @@ import {
 import { RotateCw } from "lucide-react";
 import { getRandomWord } from "../utils";
 import TypingGraph from "./TypingGraph";
+import Replay from "../Replay";
 
 function GameArea() {
   const GAME_TIME = useRef<number>(30); // Time in seconds
@@ -508,22 +509,14 @@ function GameArea() {
       >
         <RotateCw size={28} strokeWidth={3} />
       </div>
-      <div className="mt-4 text-sm">
-        Characters per line: {focusLetterCount.current}
-      </div>
 
-      <button
-        onClick={scrollUpOneLine}
-        className="px-4 py-2 bg-blue-500 text-white rounded"
-      >
-        Scroll Up
-      </button>
       {gameState.gameStatus === "finished" && (
-        <TypingGraph
-          typingState={typingState}
-          totalTime={GAME_TIME.current}
-          difficulty={GAME_DIFFICULTY.current}
-        />
+        // <TypingGraph
+        //   typingState={typingState}
+        //   totalTime={GAME_TIME.current}
+        //   difficulty={GAME_DIFFICULTY.current}
+        // />
+        <Replay words={gameState.originalWords} typingData={typingState} />
       )}
     </div>
   );

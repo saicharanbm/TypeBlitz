@@ -1,6 +1,7 @@
 import { toast } from "react-toastify";
 import {
   firstUserPayload,
+  GameState,
   LetterDetailType,
   messageType,
   roomDetailsType,
@@ -75,6 +76,28 @@ export const processTypingData = (
   console.log("Processed result:", JSON.stringify(result, null, 2));
 
   return result;
+};
+export const generateReplayWords = (
+  words: string[],
+  typingData: TypingState
+) => {
+  let counter = 1;
+  let maxCounter = 1;
+
+  typingData.letterDetails.forEach((detail) => {
+    if (detail.type === LetterDetailType.next) {
+      counter++;
+    } else if (detail.type === LetterDetailType.previous) {
+      counter = Math.max(1, counter - 1);
+    }
+
+    if (counter > maxCounter) {
+      maxCounter = counter;
+    }
+  });
+
+  const updatedWords = words.slice(0, maxCounter);
+  return updatedWords;
 };
 
 export const getRandomWord = (wordType: wordDifficulty): string => {
