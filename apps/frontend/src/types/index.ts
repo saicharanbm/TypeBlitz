@@ -6,7 +6,6 @@ export type GameState = {
   gameStatus: "waiting" | "playing" | "finished";
   timeLeft: number;
   focus: boolean;
-  wpm: number;
 };
 
 export interface LetterInfo {

@@ -21,67 +21,8 @@ const TypingGraph = ({
 }) => {
   const typingData = processTypingData(typingState, totalTime);
   console.log(JSON.stringify(typingData, null, 2));
-  //   if (data && data.graphData) {
-  //     return (
-  //       <div className="bg-nav text-textPrimary rounded-md flex flex-col gap-4">
-  //         {data.graphData.map((details, id) => (
-  //           <div key={id} className="flex flex-col gap-2">
-  //             <span>Time : {details.time}</span>
-  //             <span>Correct Count : {details.correctCount}</span>
-  //             <span>Correct WPM : {details.correctWPM}</span>
-  //             <span>Raw Count : {details.rawCount}</span>
-  //             <span>Raw WPM : {details.rawWPM}</span>
-  //             <span>Error Count : {details.errorCount}</span>
 
-  //             {/* <div>{JSON.stringify(details, null, 2)}</div> */}
-  //           </div>
-  //         ))}
-  //       </div>
-  //     );
-  //   }
   return (
-    // <div className="w-full h-96">
-    //   <ResponsiveContainer width="100%" height="100%">
-    //     <LineChart data={data}>
-    //       <CartesianGrid strokeDasharray="3 3" />
-    //       <XAxis
-    //         dataKey="time"
-    //         label={{
-    //           value: "Time (s)",
-    //           position: "insideBottomRight",
-    //           offset: 0,
-    //         }}
-    //       />
-    //       <YAxis
-    //         label={{ value: "Count", angle: -90, position: "insideLeft" }}
-    //       />
-    //       <Tooltip />
-    //       <Legend />
-    //       <Line
-    //         type="monotone"
-    //         dataKey="correctCount"
-    //         stroke="#4caf50"
-    //         strokeWidth={2}
-    //         name="Correct"
-    //       />
-    //       <Line
-    //         type="monotone"
-    //         dataKey="rawCount"
-    //         stroke="#2196f3"
-    //         strokeWidth={2}
-    //         name="Total Typed"
-    //       />
-    //       <Line
-    //         type="monotone"
-    //         dataKey="errorCount"
-    //         stroke="#f44336"
-    //         strokeWidth={2}
-    //         name="Errors"
-    //       />
-    //     </LineChart>
-    //   </ResponsiveContainer>
-    // </div>
-    // <div>Some thing went wrong</div>
     <div className="w-full h-96 p-4 flex ">
       <div className=" pr-4 pt-7 flex flex-col gap-5">
         <div className="text-center">
@@ -105,13 +46,6 @@ const TypingGraph = ({
             %
           </h1>
         </div>
-        {/* <div className="text-base md:text-lg  text-center">
-          <p className=" text-textSecondary">test type</p>
-          <p className="text-primaryColor">time {totalTime}</p>
-          <p className="text-primaryColor inline-block">
-            difficulty {difficulty}
-          </p>
-        </div> */}
       </div>
       <div className="w-full flex flex-col">
         <ResponsiveContainer width="100%" height="85%">

@@ -22,7 +22,6 @@ function GameArea() {
     gameStatus: "waiting",
     timeLeft: GAME_TIME.current,
     focus: false,
-    wpm: 0,
   });
   const [typingState, setTypingState] = useState<TypingState>({
     startTimestamp: null,
@@ -33,6 +32,42 @@ function GameArea() {
   });
 
   const gameRef = useRef<HTMLDivElement | null>(null);
+  const [lineOffset, setLineOffset] = useState(0);
+  const [charsPerLine, setCharsPerLine] = useState(0); //approx character in every 2 linesearly
+  const focusLetterCount = useRef(0);
+  useEffect(() => {
+    if (gameRef.current) {
+      const calculateCharsPerLine = () => {
+        const containerWidth = gameRef.current
+          ? gameRef.current.getBoundingClientRect().width
+          : 0;
+
+        const charWidth = 15.2;
+
+        const calculatedCharsPerLine =
+          Math.floor(containerWidth / charWidth) * 2;
+        setCharsPerLine(calculatedCharsPerLine);
+      };
+
+      // Initial calculation
+      calculateCharsPerLine();
+
+      // Handle window resizing
+      window.addEventListener("resize", calculateCharsPerLine);
+
+      // Cleanup
+      return () => {
+        window.removeEventListener("resize", calculateCharsPerLine);
+      };
+    }
+  }, []);
+  const scrollUpOneLine = () => {
+    const lineHeight = 48;
+
+    gameRef.current?.focus();
+    setLineOffset((prev) => prev + lineHeight);
+    focusLetterCount.current = Math.round(focusLetterCount.current / 2);
+  };
 
   const initializeGame = useCallback((): void => {
     const newOriginalWords = Array.from({ length: 200 }, () => {
@@ -50,7 +85,6 @@ function GameArea() {
       gameStatus: "waiting",
       timeLeft: GAME_TIME.current,
       focus: true,
-      wpm: 0,
     });
     setTypingState({
       startTimestamp: null,
@@ -59,6 +93,8 @@ function GameArea() {
       correctLetterCount: 0,
       errorCount: 0,
     });
+    setLineOffset(0);
+    focusLetterCount.current = 0;
 
     gameRef.current?.focus();
   }, []);
@@ -116,19 +152,6 @@ function GameArea() {
     }
   }, [gameState.gameStatus, gameState.timeLeft]);
 
-  useEffect(() => {
-    if (gameState.gameStatus === "finished") {
-      const wordsTyped =
-        gameState.currentWordIndex +
-        gameState.currentLetterIndex /
-          gameState.words[gameState.currentWordIndex]?.length;
-      setGameState((prev) => ({
-        ...prev,
-        wpm: Math.round(wordsTyped / (GAME_TIME.current / 60) || 0),
-      }));
-    }
-  }, [gameState.gameStatus]);
-
   const handleKeyUp = (event: React.KeyboardEvent<HTMLDivElement>): void => {
     if (gameState.gameStatus === "finished") return;
 
@@ -136,6 +159,8 @@ function GameArea() {
     const isLetter = key.length === 1 && key !== " ";
     const isSpace = key === " ";
     const isBackspace = key === "Backspace";
+
+    if (focusLetterCount.current > charsPerLine) scrollUpOneLine();
 
     if (gameState.gameStatus === "waiting" && isLetter) {
       setGameState((prev) => ({
@@ -173,7 +198,7 @@ function GameArea() {
         currentLetter.type = letterType.incorrect;
         type = LetterDetailType.incorrect;
       }
-
+      focusLetterCount.current += 1;
       //update the typed key details
       setTypingState((prev) => ({
         ...prev,
@@ -209,6 +234,7 @@ function GameArea() {
     }
 
     if (isSpace) {
+      focusLetterCount.current += 1;
       if (
         gameState.currentLetterIndex >=
         gameState.words[gameState.currentWordIndex].length
@@ -264,6 +290,7 @@ function GameArea() {
       const currentLetterIndex = gameState.currentLetterIndex - 1;
 
       if (currentLetterIndex < 0 && gameState.currentWordIndex === 0) return;
+      focusLetterCount.current -= 1;
       const addRemoveRecordToTypingState = (type: LetterDetailType) => {
         setTypingState((prev) => ({
           ...prev,
@@ -413,11 +440,7 @@ function GameArea() {
         </div>
       </div>
       <div className="flex justify-between select-none items-center mb-8">
-        <div className="text-yellow-400 text-xl">
-          {gameState.gameStatus === "finished"
-            ? `WPM: ${gameState.wpm}`
-            : gameState.timeLeft}
-        </div>
+        <div className="text-yellow-400 text-xl">{gameState.timeLeft}</div>
       </div>
       <div
         className={` relative h-[144px] w-full  ${gameRef.current !== document.activeElement ? "cursor-pointer" : ""} `}
@@ -446,7 +469,10 @@ function GameArea() {
           aria-label="Typing area"
           onKeyDown={handleKeyUp}
         >
-          <div className="text-container select-none text-textSecondary">
+          <div
+            className="text-container select-none text-textSecondary"
+            style={{ transform: `translateY(-${lineOffset}px)` }}
+          >
             {gameState.words.map((word, wordIndex) => (
               <div key={wordIndex} className={`word inline-block mx-1`}>
                 {word.map((data, letterIndex) => (
@@ -454,7 +480,9 @@ function GameArea() {
                     {wordIndex === gameState.currentWordIndex &&
                     letterIndex === gameState.currentLetterIndex ? (
                       <span
-                        className={`blinking-cursor ${gameState.gameStatus === "playing" ? "" : "blink"}`}
+                        className={`blinking-cursor ${
+                          gameState.gameStatus === "playing" ? "" : "blink"
+                        }`}
                       ></span>
                     ) : null}
                     {data.letter}
@@ -464,7 +492,9 @@ function GameArea() {
                   gameState.currentLetterIndex >=
                     gameState.words[gameState.currentWordIndex].length && (
                     <span
-                      className={`blinking-cursor ${gameState.gameStatus === "playing" ? "" : "blink"}`}
+                      className={`blinking-cursor ${
+                        gameState.gameStatus === "playing" ? "" : "blink"
+                      }`}
                     ></span>
                   )}
               </div>
@@ -478,24 +508,22 @@ function GameArea() {
       >
         <RotateCw size={28} strokeWidth={3} />
       </div>
+      <div className="mt-4 text-sm">
+        Characters per line: {focusLetterCount.current}
+      </div>
+
+      <button
+        onClick={scrollUpOneLine}
+        className="px-4 py-2 bg-blue-500 text-white rounded"
+      >
+        Scroll Up
+      </button>
       {gameState.gameStatus === "finished" && (
         <TypingGraph
           typingState={typingState}
           totalTime={GAME_TIME.current}
           difficulty={GAME_DIFFICULTY.current}
         />
-        // <div>
-        //   {typingState.letterDetails.map((details, id) => (
-        //     <div key={id} className="flex gap-2">
-        //       <span className="text-textPrimary">{details.type}</span>
-
-        //       <span className="text-textSecondary">{details.letter}</span>
-        //       <span className="text-primaryColorover ">
-        //         {details.timestamp}
-        //       </span>
-        //     </div>
-        //   ))}
-        // </div>
       )}
     </div>
   );
