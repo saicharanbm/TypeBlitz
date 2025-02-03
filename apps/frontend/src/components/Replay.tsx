@@ -1,13 +1,22 @@
-import { useEffect, useRef, useState } from "react";
-import { generateReplayWords } from "./utils";
-import { LetterDetailType, LetterInfo, letterType, TypingState } from "./types";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { generateReplayWords } from "../utils";
+import { Play, Pause, RotateCcw } from "lucide-react";
+import {
+  LetterDetailType,
+  LetterInfo,
+  letterType,
+  PlayerState,
+  TypingState,
+} from "../types";
 
 function Replay({
   words,
   typingData,
+  totalTime,
 }: {
   words: string[];
   typingData: TypingState;
+  totalTime: number;
 }) {
   const [replayState, setReplayState] = useState<{
     words: LetterInfo[][];
@@ -15,8 +24,13 @@ function Replay({
     currentWordIndex: number;
     currentLetterIndex: number;
   }>();
-
-  useEffect(() => {
+  const [playerState, setPlayerState] = useState<PlayerState>(PlayerState.idle);
+  const playerPosition = useRef(0);
+  const playerTimer = useRef<ReturnType<typeof setTimeout>>();
+  const typeTimer = useRef<ReturnType<typeof setTimeout>>();
+  const timerCount = useRef<number>(0);
+  const [wpm, setWPM] = useState(0);
+  const initializePlayer = useCallback(() => {
     const data = generateReplayWords(words, typingData);
     const newWords = data.map((word) =>
       word.split("").map((letter) => ({ letter, type: letterType.normal }))
@@ -27,23 +41,41 @@ function Replay({
       currentWordIndex: 0,
       currentLetterIndex: 0,
     });
-    startReplay();
-  }, [words, typingData]);
+  }, [typingData, words]);
+
+  useEffect(() => {
+    initializePlayer();
+  }, [initializePlayer]);
+  const runTimer = () => {
+    if (timerCount.current > totalTime) return;
+    setTimeout(() => {
+      setWPM(timerCount.current - 1);
+      timerCount.current += 1;
+    }, 1000);
+    runTimer();
+  };
+
   function startReplay() {
     let previousTime = 0;
+    if (
+      playerPosition.current < typingData.letterDetails.length &&
+      playerPosition.current > 0
+    )
+      previousTime = typingData.letterDetails[playerPosition.current].timestamp;
     if (!replayState) return;
+    runTimer();
+    setPlayerState(PlayerState.playing);
+    const scheduleNextAction = () => {
+      if (playerPosition.current >= typingData.letterDetails.length) return; // Stop if we've processed all details
 
-    const scheduleNextAction = (index: number) => {
-      if (index >= typingData.letterDetails.length) return; // Stop if we've processed all details
-
-      const detail = typingData.letterDetails[index];
+      const detail = typingData.letterDetails[playerPosition.current];
 
       // Calculate the delay based on the previous time
       const delay = detail.timestamp - previousTime;
       previousTime = detail.timestamp;
 
       // Schedule the next action after the delay
-      setTimeout(() => {
+      playerTimer.current = setTimeout(() => {
         // Handle the action based on the detail type
         switch (detail.type) {
           case LetterDetailType.correct:
@@ -163,18 +195,58 @@ function Replay({
             console.log("Unknown action");
         }
 
+        playerPosition.current += 1;
         // Schedule the next action
-        scheduleNextAction(index + 1);
+        scheduleNextAction();
       }, delay);
     };
 
     // Start the first action
-    scheduleNextAction(0);
+    scheduleNextAction();
   }
+  const stopReplay = () => {
+    if (playerTimer) clearTimeout(playerTimer.current);
+    setPlayerState(PlayerState.paused);
+  };
+  const restartPlayer = () => {
+    initializePlayer();
+    playerPosition.current = 0;
+    if (playerTimer.current) clearTimeout(playerTimer.current);
+    startReplay();
+  };
   if (replayState) {
     return (
-      <div className="w-full flex flex-col gap-4">
-        <button onClick={startReplay}>play</button>
+      <div className="w-full flex flex-col gap-2 ">
+        <div className="w-full flex gap-3 items-center">
+          <p className="text-textSecondary font-robotoMono">Replay</p>
+          {playerState !== PlayerState.playing ? (
+            <Play
+              className="text-textSecondary cursor-pointer hover:text-textPrimary transition-colors duration-[150ms]"
+              onClick={startReplay}
+              size={25}
+              strokeWidth={3}
+            />
+          ) : (
+            <Pause
+              className="text-textSecondary cursor-pointer hover:text-textPrimary transition-colors duration-[150ms]"
+              onClick={stopReplay}
+              size={25}
+              strokeWidth={3}
+            />
+          )}
+
+          <RotateCcw
+            className="text-textSecondary cursor-pointer hover:text-textPrimary transition-colors duration-[150ms]"
+            onClick={restartPlayer}
+            size={25}
+            strokeWidth={3}
+          />
+          <p className="text-primaryColor font-robotoMono">{wpm}wpm</p>
+          <p className="text-primaryColor font-robotoMono">
+            {typeTimer.current}
+          </p>
+        </div>
+
         <div className="leading-[3rem] focus:outline-none font-robotoMono  text-2xl tracking-wide">
           <div className="text-container select-none text-textSecondary">
             {replayState.words.map((word, wordIndex) => (

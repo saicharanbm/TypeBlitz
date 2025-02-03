@@ -9,7 +9,7 @@ import {
 import { RotateCw } from "lucide-react";
 import { getRandomWord } from "../utils";
 import TypingGraph from "./TypingGraph";
-import Replay from "../Replay";
+import Replay from "./Replay";
 
 function GameArea() {
   const GAME_TIME = useRef<number>(30); // Time in seconds
@@ -367,6 +367,19 @@ function GameArea() {
     GAME_DIFFICULTY.current = difficulty;
     initializeGame();
   };
+  {
+    if (gameState.gameStatus === "finished")
+      return (
+        <TypingGraph
+          words={gameState.originalWords}
+          typingState={typingState}
+          totalTime={GAME_TIME.current}
+          difficulty={GAME_DIFFICULTY.current}
+          initializeGame={initializeGame}
+        />
+      );
+    // <Replay words={gameState.originalWords} typingData={typingState} />
+  }
 
   return (
     <div>
@@ -462,9 +475,7 @@ function GameArea() {
 
         <div
           ref={gameRef}
-          className={`game-area h-[144px] overflow-hidden leading-[3rem] focus:outline-none font-robotoMono  text-2xl tracking-wide ${
-            gameState.gameStatus === "finished" ? "opacity-40" : ""
-          }`}
+          className="game-area h-[144px] overflow-hidden leading-[3rem] focus:outline-none font-robotoMono  text-2xl tracking-wide"
           tabIndex={0}
           role="textbox"
           aria-label="Typing area"
@@ -509,15 +520,6 @@ function GameArea() {
       >
         <RotateCw size={28} strokeWidth={3} />
       </div>
-
-      {gameState.gameStatus === "finished" && (
-        <TypingGraph
-          typingState={typingState}
-          totalTime={GAME_TIME.current}
-          difficulty={GAME_DIFFICULTY.current}
-        />
-        // <Replay words={gameState.originalWords} typingData={typingState} />
-      )}
     </div>
   );
 }

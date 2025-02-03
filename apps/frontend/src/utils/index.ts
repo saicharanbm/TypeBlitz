@@ -1,7 +1,6 @@
 import { toast } from "react-toastify";
 import {
   firstUserPayload,
-  GameState,
   LetterDetailType,
   messageType,
   roomDetailsType,
@@ -35,11 +34,9 @@ export const processTypingData = (
 
   const result = {
     totalTime: totalDuration,
-    totalWPM: Math.round(
-      typingState.correctLetterCount
-        ? typingState.correctLetterCount / 5 / (totalDuration / 60)
-        : 0
-    ),
+    totalWPM: typingState.correctLetterCount
+      ? typingState.correctLetterCount / 5 / (totalDuration / 60)
+      : 0,
     graphData: Array.from({ length: totalDuration }).map((_, id) => ({
       time: id + 1,
       correctCount: 0,

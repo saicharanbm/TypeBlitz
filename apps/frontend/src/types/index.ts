@@ -122,3 +122,9 @@ export enum wordDifficulty {
   medium = "medium",
   hard = "hard",
 }
+
+export enum PlayerState {
+  idle = "idle",
+  playing = "playing",
+  paused = "paused",
+}
