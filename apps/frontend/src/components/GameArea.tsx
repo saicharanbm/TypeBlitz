@@ -511,12 +511,12 @@ function GameArea() {
       </div>
 
       {gameState.gameStatus === "finished" && (
-        // <TypingGraph
-        //   typingState={typingState}
-        //   totalTime={GAME_TIME.current}
-        //   difficulty={GAME_DIFFICULTY.current}
-        // />
-        <Replay words={gameState.originalWords} typingData={typingState} />
+        <TypingGraph
+          typingState={typingState}
+          totalTime={GAME_TIME.current}
+          difficulty={GAME_DIFFICULTY.current}
+        />
+        // <Replay words={gameState.originalWords} typingData={typingState} />
       )}
     </div>
   );

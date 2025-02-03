@@ -35,9 +35,11 @@ export const processTypingData = (
 
   const result = {
     totalTime: totalDuration,
-    totalWPM: typingState.correctLetterCount
-      ? typingState.correctLetterCount / 5 / (totalDuration / 60)
-      : 0,
+    totalWPM: Math.round(
+      typingState.correctLetterCount
+        ? typingState.correctLetterCount / 5 / (totalDuration / 60)
+        : 0
+    ),
     graphData: Array.from({ length: totalDuration }).map((_, id) => ({
       time: id + 1,
       correctCount: 0,
@@ -66,10 +68,14 @@ export const processTypingData = (
     result.graphData[index].rawCount += 1;
     result.graphData[index].errorCount += 1;
   });
+  let previousCount = 0;
+  result.graphData.forEach((element, index) => {
+    element.correctWPM = Math.round(
+      ((element.correctCount + previousCount) * 60) / (index + 1) / 5
+    );
+    element.rawWPM = Math.round((element.rawCount * 60) / 5);
 
-  result.graphData.forEach((element) => {
-    element.correctWPM = (element.correctCount * 60) / 5;
-    element.rawWPM = (element.rawCount * 60) / 5;
+    previousCount += element.correctCount;
   });
 
   // Log final result in a more readable way

@@ -19,7 +19,7 @@ export type TypingState = {
   correctLetterCount: number;
   errorCount: number;
 };
-type LetterDetail = {
+export type LetterDetail = {
   type: LetterDetailType;
   timestamp: number;
   letter: string;
