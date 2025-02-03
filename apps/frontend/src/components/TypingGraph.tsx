@@ -174,6 +174,7 @@ const TypingGraph = ({
             words={words}
             typingData={typingState}
             totalTime={totalTime}
+            graphData={typingData.graphData}
           />
         )}
       </div>

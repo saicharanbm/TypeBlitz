@@ -13,10 +13,19 @@ function Replay({
   words,
   typingData,
   totalTime,
+  graphData,
 }: {
   words: string[];
   typingData: TypingState;
   totalTime: number;
+  graphData: {
+    time: number;
+    correctCount: number;
+    rawCount: number;
+    errorCount: number;
+    correctWPM: number;
+    rawWPM: number;
+  }[];
 }) {
   const [replayState, setReplayState] = useState<{
     words: LetterInfo[][];
@@ -27,7 +36,7 @@ function Replay({
   const [playerState, setPlayerState] = useState<PlayerState>(PlayerState.idle);
   const playerPosition = useRef(0);
   const playerTimer = useRef<ReturnType<typeof setTimeout>>();
-  const typeTimer = useRef<ReturnType<typeof setTimeout>>();
+  const typeTimer = useRef<ReturnType<typeof setInterval>>();
   const timerCount = useRef<number>(0);
   const [wpm, setWPM] = useState(0);
   const initializePlayer = useCallback(() => {
@@ -46,13 +55,20 @@ function Replay({
   useEffect(() => {
     initializePlayer();
   }, [initializePlayer]);
+
   const runTimer = () => {
-    if (timerCount.current > totalTime) return;
-    setTimeout(() => {
-      setWPM(timerCount.current - 1);
+    typeTimer.current = setInterval(() => {
+      if (timerCount.current >= totalTime) {
+        clearInterval(typeTimer.current);
+        return; // Exit after clearing the interval
+      }
+
+      if (graphData[timerCount.current]) {
+        setWPM(graphData[timerCount.current].correctWPM);
+      }
+
       timerCount.current += 1;
     }, 1000);
-    runTimer();
   };
 
   function startReplay() {
@@ -94,7 +110,7 @@ function Replay({
                 currentLetterIndex: prev.currentLetterIndex + 1,
               };
             });
-            console.log("Correct:", detail.letter);
+
             break;
           case LetterDetailType.incorrect:
             setReplayState((prev) => {
@@ -112,7 +128,7 @@ function Replay({
                 currentLetterIndex: prev.currentLetterIndex + 1,
               };
             });
-            console.log("Incorrect:", detail.letter);
+
             break;
           case LetterDetailType.next:
             setReplayState((prev) => {
@@ -123,7 +139,7 @@ function Replay({
                 currentLetterIndex: 0,
               };
             });
-            console.log("Next letter");
+
             break;
           case LetterDetailType.previous:
             setReplayState((prev) => {
@@ -135,7 +151,7 @@ function Replay({
                   prev.words[prev.currentWordIndex - 1].length || 0,
               };
             });
-            console.log("Previous letter");
+
             break;
           case LetterDetailType.extra:
             setReplayState((prev) => {
@@ -153,7 +169,7 @@ function Replay({
                 currentLetterIndex: prev.currentLetterIndex + 1,
               };
             });
-            console.log("Extra action");
+
             break;
           case LetterDetailType.remove:
             setReplayState((prev) => {
@@ -171,7 +187,7 @@ function Replay({
                 currentLetterIndex: prev.currentLetterIndex - 1,
               };
             });
-            console.log("Remove action");
+
             break;
           case LetterDetailType.removeExtra:
             setReplayState((prev) => {
@@ -189,7 +205,7 @@ function Replay({
                 currentLetterIndex: prev.currentLetterIndex - 1,
               };
             });
-            console.log("Remove extra action");
+
             break;
           default:
             console.log("Unknown action");
@@ -205,13 +221,17 @@ function Replay({
     scheduleNextAction();
   }
   const stopReplay = () => {
-    if (playerTimer) clearTimeout(playerTimer.current);
+    clearTimeout(playerTimer.current);
     setPlayerState(PlayerState.paused);
+    clearInterval(typeTimer.current);
   };
   const restartPlayer = () => {
     initializePlayer();
     playerPosition.current = 0;
     if (playerTimer.current) clearTimeout(playerTimer.current);
+    clearInterval(typeTimer.current);
+    timerCount.current = 0;
+    setWPM(0);
     startReplay();
   };
   if (replayState) {
@@ -243,7 +263,7 @@ function Replay({
           />
           <p className="text-primaryColor font-robotoMono">{wpm}wpm</p>
           <p className="text-primaryColor font-robotoMono">
-            {typeTimer.current}
+            {timerCount.current}
           </p>
         </div>
 
