@@ -2,20 +2,25 @@ import { WebSocket } from "ws";
 // import { v4 as uuid } from "uuid";
 import { RoomManager } from "./RoomManager";
 import { generateRoomId, isDifficulty, isTotalTime } from "./utils";
-import { gameProgress, totalTime, wordDifficulty } from "./types";
+import { gameProgress, totalTime, TypingState, wordDifficulty } from "./types";
 export class User {
   id: string = "";
   roomId: string = "";
   name: string = "";
   displayName: string = "";
-  wordCount: number = 0;
-  correctWordCount: number = 0;
-  isAdmin: boolean;
+  status: "idle" | "playing" | "finished" = "idle";
+  typingState: TypingState = {
+    letterDetails: [],
+    correctLetterCount: 0,
+    errorCount: 0,
+  };
+
+  isAdmin: boolean = false;
   ws: WebSocket;
 
   constructor(ws: WebSocket) {
     this.ws = ws;
-    this.isAdmin = false;
+
     this.handleRequests();
   }
 
@@ -198,6 +203,11 @@ export class User {
 
           RoomManagerInstance.startGame(this.roomId, this);
 
+          break;
+        }
+        case "handle-Key-down": {
+          const { key, wordIndex, letterIndex } = data.payload;
+          const RoomManagerInstance = RoomManager.getInstance();
           break;
         }
       }

@@ -40,7 +40,7 @@ export class RoomManager {
     if (roomData) {
       roomData.difficulty = difficulty;
       roomData.time = time;
-      roomData.words = Array.from({ length: 200 }, (_, id) => {
+      roomData.words = Array.from({ length: 400 }, (_, id) => {
         return getRandomWord(difficulty);
       });
     }
@@ -101,62 +101,68 @@ export class RoomManager {
     if (!room) {
       return;
     }
+    //invalidate the request if there is only one user in the room
     if (room.users.length < 2) {
       user.sendMessage({
         type: "invalid-request",
         payload: {
-          message: "There should be atleast 2 people in the group.",
+          message: "There should be atleast 2 people in the room.",
         },
       });
       return;
     }
     room.progress = gameProgress.starting;
+
+    room.startTime = Date.now() + 5000;
     this.broadcastMessage(roomId, {
       type: "game-status-start",
-      payload: { message: "The game starts in 10 seconds!", words: room.words },
+      payload: {
+        message: "The game starts in 5 seconds!",
+        words: room.words,
+        startTime: room.startTime,
+      },
     });
-    // Countdown from 10 seconds
-    let countdown = 5;
-    const countdownInterval = setInterval(() => {
-      // Notify users about the countdown
-      this.broadcastMessage(roomId, {
-        type: "countdown",
-        payload: { secondsLeft: countdown },
-      });
+    // // Countdown from 10 seconds
+    // let countdown = 5;
+    // const countdownInterval = setInterval(() => {
+    //   // Notify users about the countdown
+    //   this.broadcastMessage(roomId, {
+    //     type: "countdown",
+    //     payload: { secondsLeft: countdown },
+    //   });
 
-      countdown--;
+    //   countdown--;
 
-      if (countdown < 0) {
-        clearInterval(countdownInterval);
-        // Set the game progress to playing
-        room.progress = gameProgress.playing;
+    //   if (countdown < 0) {
+    //     clearInterval(countdownInterval);
+    //     // Set the game progress to playing
+    //     room.progress = gameProgress.playing;
 
-        this.broadcastMessage(roomId, {
-          type: "game-status-play",
-          payload: { message: "The game has started!" },
-        });
+    //     this.broadcastMessage(roomId, {
+    //       type: "game-status-play",
+    //       payload: { message: "The game has started!" },
+    //     });
 
-        // Game duration of 60 seconds
-        setTimeout(() => {
-          room.progress = gameProgress.finished;
-          this.broadcastMessage(roomId, {
-            type: "game-finished",
-            payload: { message: "The game has finished." },
-          });
-        }, room.time * 1000);
-      }
-    }, 5000);
+    //     // Game duration of 60 seconds
+    //     setTimeout(() => {
+    //       room.progress = gameProgress.finished;
+    //       this.broadcastMessage(roomId, {
+    //         type: "game-finished",
+    //         payload: { message: "The game has finished." },
+    //       });
+    //     }, room.time * 1000);
+    //   }
+    // }, 5000);
   }
 
   createRoom(user: User) {
     const roomId = generateRoomId();
-    const words = Array.from({ length: 200 }, (_, id) => {
+    const words = Array.from({ length: 400 }, (_, id) => {
       return getRandomWord(wordDifficulty.easy);
     });
     const data: roomDetails = {
       words,
       time: totalTime.sixty,
-      roomId,
       difficulty: wordDifficulty.easy,
       users: [user],
       progress: gameProgress.waiting,

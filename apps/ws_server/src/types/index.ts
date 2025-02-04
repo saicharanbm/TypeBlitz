@@ -11,7 +11,27 @@ export enum totalTime {
   sixty = 60,
   onetwenty = 120,
 }
-
+export type TypingState = {
+  // startTimestamp: number | null;
+  // endTimestamp: number | null;
+  letterDetails: LetterDetail[];
+  correctLetterCount: number;
+  errorCount: number;
+};
+export type LetterDetail = {
+  type: LetterDetailType;
+  timestamp: number;
+  letter: string;
+};
+export enum LetterDetailType {
+  correct = "correct",
+  incorrect = "incorrect",
+  next = "next",
+  previous = "previous",
+  extra = "extra",
+  remove = "remove",
+  removeExtra = "removeExtra",
+}
 export enum gameProgress {
   waiting = "waiting",
   starting = "starting",
@@ -21,7 +41,8 @@ export enum gameProgress {
 
 export type roomDetails = {
   words: string[];
-  roomId: string;
+  startTime?: number | null;
+  endTime?: number | null;
   difficulty: wordDifficulty;
   time: totalTime;
   users: User[];
