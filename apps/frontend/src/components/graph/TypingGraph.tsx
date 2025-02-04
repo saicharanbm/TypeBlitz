@@ -8,11 +8,13 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Tooltip as ReactTooltip } from "react-tooltip";
-import { TypingState, wordDifficulty } from "../types";
-import { processTypingData } from "../utils";
+import { TypingState, wordDifficulty } from "../../types";
+import { processTypingData } from "../../utils";
 import { Rewind, RotateCw } from "lucide-react";
 import { useState } from "react";
-import Replay from "./Replay";
+import Replay from "../Replay";
+import CustomErrorDot from "./CustomErrorDot";
+
 const TypingGraph = ({
   words,
   typingState,
@@ -31,7 +33,7 @@ const TypingGraph = ({
 
   if (typingData) {
     return (
-      <div className="w-full py-6 md:py-8 lg-py-12 flex flex-col gap-2">
+      <div className="w-full  flex flex-col">
         <div className="w-full h-96 p-4 flex ">
           <div className=" pr-4 pt-7 flex flex-col gap-5">
             <div className="text-center">
@@ -104,7 +106,6 @@ const TypingGraph = ({
                 <Tooltip
                   contentStyle={{ backgroundColor: "#2c2e31", border: "none" }}
                 />
-                {/* <Legend verticalAlign="top" height={36} /> */}
 
                 {/* Raw WPM Line */}
                 <Line
@@ -116,6 +117,7 @@ const TypingGraph = ({
                   dot={false}
                   name="Raw WPM"
                 />
+
                 {/* Correct WPM Line */}
                 <Line
                   yAxisId="left"
@@ -132,13 +134,15 @@ const TypingGraph = ({
                   yAxisId="right"
                   type="monotone"
                   dataKey="errorCount"
-                  stroke="#FF4C4C"
-                  strokeWidth={0.5}
-                  dot={false}
+                  stroke="none"
+                  dot={(props) => (
+                    <CustomErrorDot {...props} value={props?.value} />
+                  )}
                   name="Errors"
                 />
               </LineChart>
             </ResponsiveContainer>
+
             <div className="w-full h-auto flex justify-around ">
               <div className="text-center">
                 <h3>characters</h3>
@@ -155,7 +159,7 @@ const TypingGraph = ({
             </div>
           </div>
         </div>
-        <div className="w-full  md:p-12  flex items-center justify-center gap-4">
+        <div className="w-full  md:p-6  flex items-center justify-center gap-4">
           <RotateCw
             className="text-textSecondary cursor-pointer hover:text-textPrimary transition-colors duration-[150ms]"
             onClick={initializeGame}

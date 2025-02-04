@@ -128,3 +128,9 @@ export enum PlayerState {
   playing = "playing",
   paused = "paused",
 }
+
+export type CustomDotProps = {
+  cx?: number;
+  cy?: number;
+  value?: number;
+};
