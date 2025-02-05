@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { GameState } from "../../types";
 import { handleKeyDown } from "../../utils/handleKeyDown";
+import TextArea from "../TextArea";
 
 function GameArea({
   gameState,
@@ -116,7 +117,7 @@ function GameArea({
         <div className="flex justify-between select-none items-center mb-8">
           <div className="text-yellow-400 text-xl">{gameState.timeLeft}</div>
         </div>
-        <div
+        {/* <div
           className={` relative h-[144px] w-full  ${gameRef.current !== document.activeElement ? "cursor-pointer" : ""} `}
         >
           {!gameState.focus && (
@@ -141,21 +142,23 @@ function GameArea({
             tabIndex={0}
             role="textbox"
             aria-label="Typing area"
-            onKeyDown={(event) =>
-              handleKeyDown(
-                event,
-                gameState,
-                charsPerLine,
-                totalTime,
-                setGameState,
-                gameRef,
-                setLineOffset,
-                focusLetterCount,
-                undefined,
-                undefined,
-                wsConnection
-              )
-            }
+            onKeyDown={(event) => {
+              if (gameState.gameStatus === "playing") {
+                handleKeyDown(
+                  event,
+                  gameState,
+                  charsPerLine,
+                  totalTime,
+                  setGameState,
+                  gameRef,
+                  setLineOffset,
+                  focusLetterCount,
+                  undefined,
+                  undefined,
+                  wsConnection
+                );
+              }
+            }}
           >
             <div
               className="text-container select-none text-textSecondary"
@@ -189,7 +192,18 @@ function GameArea({
               ))}
             </div>
           </div>
-        </div>
+        </div> */}
+        <TextArea
+          gameState={gameState}
+          setGameState={setGameState}
+          gameRef={gameRef}
+          charsPerLine={charsPerLine}
+          totalTime={totalTime}
+          focusLetterCount={focusLetterCount}
+          lineOffset={lineOffset}
+          setLineOffset={setLineOffset}
+          wsConnection={wsConnection}
+        />
       </div>
     );
   }

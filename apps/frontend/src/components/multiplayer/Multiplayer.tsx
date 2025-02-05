@@ -111,21 +111,7 @@ function Multiplayer() {
             showToastSuccess(message);
             break;
           }
-          // case "countdown": {
-          //   const { secondsLeft } = data.payload;
-          //   if (secondsLeft) setTimer(secondsLeft);
-          //   break;
-          // }
-          // case "game-status-play": {
-          //   setGameData((prev) => {
-          //     if (!prev) return;
-          //     return {
-          //       ...prev,
-          //       gameStatus: "playing",
-          //     };
-          //   });
-          //   break;
-          // }
+
           default:
             console.warn("Unknown message type:", data.type);
         }
