@@ -124,37 +124,6 @@ export class RoomManager {
         endTime: room.endTime,
       },
     });
-    // // Countdown from 10 seconds
-    // let countdown = 5;
-    // const countdownInterval = setInterval(() => {
-    //   // Notify users about the countdown
-    //   this.broadcastMessage(roomId, {
-    //     type: "countdown",
-    //     payload: { secondsLeft: countdown },
-    //   });
-
-    //   countdown--;
-
-    //   if (countdown < 0) {
-    //     clearInterval(countdownInterval);
-    //     // Set the game progress to playing
-    //     room.progress = gameProgress.playing;
-
-    //     this.broadcastMessage(roomId, {
-    //       type: "game-status-play",
-    //       payload: { message: "The game has started!" },
-    //     });
-
-    //     // Game duration of 60 seconds
-    //     setTimeout(() => {
-    //       room.progress = gameProgress.finished;
-    //       this.broadcastMessage(roomId, {
-    //         type: "game-finished",
-    //         payload: { message: "The game has finished." },
-    //       });
-    //     }, room.time * 1000);
-    //   }
-    // }, 5000);
   }
 
   createRoom(user: User) {

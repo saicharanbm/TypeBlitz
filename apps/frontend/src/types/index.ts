@@ -3,7 +3,7 @@ export type GameState = {
   originalWords: string[];
   currentWordIndex: number;
   currentLetterIndex: number;
-  gameStatus: "room" | "waiting" | "playing" | "finished";
+  gameStatus: "waiting" | "playing" | "finished";
   timeLeft: number;
   focus: boolean;
 };

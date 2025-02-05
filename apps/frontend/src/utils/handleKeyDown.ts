@@ -35,6 +35,15 @@ export const handleKeyDown = (
         endTimestamp: Date.now() + GAME_TIME * 1000,
       };
     });
+    console.log(wsConnection);
+    wsConnection?.send(
+      JSON.stringify({
+        type: "update-GameStatus",
+        payload: {
+          type: "playing",
+        },
+      })
+    );
     if (setTypingState)
       setTypingState((prev) => ({
         ...prev,

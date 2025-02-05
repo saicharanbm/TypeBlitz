@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import { GameState, letterType } from "../../types";
+import { GameState } from "../../types";
 import { handleKeyDown } from "../../utils/handleKeyDown";
 
 function GameArea({
@@ -18,6 +18,7 @@ function GameArea({
   const [charsPerLine, setCharsPerLine] = useState(0); //approx character in every 2 linesearly
   const focusLetterCount = useRef(0);
 
+  //claculate chars per line
   useEffect(() => {
     if (gameRef.current) {
       const calculateCharsPerLine = () => {
@@ -73,8 +74,9 @@ function GameArea({
       document.removeEventListener("focusin", checkFocus);
       document.removeEventListener("focusout", checkFocus);
     };
-  }, []);
+  }, [setGameState]);
 
+  //Time while Playing
   useEffect(() => {
     if (gameState.gameStatus === "playing") {
       const timer = setInterval(() => {
@@ -92,29 +94,21 @@ function GameArea({
             if (!prev) return prev;
             return { ...prev, gameStatus: "finished" };
           });
+          wsConnection.send(
+            JSON.stringify({
+              type: "update-GameStatus",
+              payload: {
+                type: "finished",
+              },
+            })
+          );
         }
       }, 1000);
       return () => {
         clearInterval(timer);
       };
     }
-  }, [gameState.gameStatus, gameState.timeLeft]);
-
-  useEffect(() => {
-    if (gameState.gameStatus === "finished") {
-      const wordsTyped =
-        gameState.currentWordIndex +
-        gameState.currentLetterIndex /
-          gameState.words[gameState.currentWordIndex]?.length;
-      setGameState((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          wpm: Math.round(wordsTyped / (totalTime / 60) || 0),
-        };
-      });
-    }
-  }, [gameState.gameStatus]);
+  }, [gameState.gameStatus, gameState.timeLeft, setGameState, wsConnection]);
 
   if (gameState) {
     return (
@@ -141,7 +135,9 @@ function GameArea({
 
           <div
             ref={gameRef}
-            className="game-area h-[144px] overflow-hidden leading-[3rem] focus:outline-none font-robotoMono  text-2xl tracking-wide"
+            className={`game-area h-[144px] overflow-hidden leading-[3rem] focus:outline-none font-robotoMono  text-2xl tracking-wide ${
+              gameState.gameStatus === "finished" ? "opacity-40" : ""
+            }`}
             tabIndex={0}
             role="textbox"
             aria-label="Typing area"
@@ -154,7 +150,10 @@ function GameArea({
                 setGameState,
                 gameRef,
                 setLineOffset,
-                focusLetterCount
+                focusLetterCount,
+                undefined,
+                undefined,
+                wsConnection
               )
             }
           >

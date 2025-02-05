@@ -207,7 +207,16 @@ export class User {
         }
         case "handle-Key-down": {
           const { key, wordIndex, letterIndex } = data.payload;
+          console.log("handle key down :", key, wordIndex, letterIndex);
           const RoomManagerInstance = RoomManager.getInstance();
+          break;
+        }
+        case "update-GameStatus": {
+          const { type } = data.payload;
+          console.log("update game status", type);
+          break;
+        }
+        default: {
           break;
         }
       }

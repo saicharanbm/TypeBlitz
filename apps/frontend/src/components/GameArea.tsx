@@ -14,7 +14,7 @@ function GameArea() {
     originalWords: [],
     currentWordIndex: 0,
     currentLetterIndex: 0,
-    gameStatus: "room",
+    gameStatus: "waiting",
     timeLeft: 0,
     focus: false,
   });
@@ -30,6 +30,7 @@ function GameArea() {
   const [lineOffset, setLineOffset] = useState(0);
   const [charsPerLine, setCharsPerLine] = useState(0); //approx character in every 2 linesearly
   const focusLetterCount = useRef(0);
+  //claculate chars per line
   useEffect(() => {
     if (gameRef.current) {
       const calculateCharsPerLine = () => {
@@ -56,13 +57,6 @@ function GameArea() {
       };
     }
   }, []);
-  // const scrollUpOneLine = () => {
-  //   const lineHeight = 48;
-
-  //   gameRef.current?.focus();
-  //   setLineOffset((prev) => prev + lineHeight);
-  //   focusLetterCount.current = Math.round(focusLetterCount.current / 2);
-  // };
 
   const initializeGame = useCallback((): void => {
     const newOriginalWords = Array.from({ length: 200 }, () => {
@@ -99,8 +93,6 @@ function GameArea() {
   }, [initializeGame]);
 
   useEffect(() => {
-    // initializeGame();
-
     const checkFocus = () => {
       if (gameRef.current === document.activeElement) {
         setGameState((prev) => {
