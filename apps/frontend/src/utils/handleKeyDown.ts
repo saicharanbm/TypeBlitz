@@ -1,16 +1,19 @@
+import { scrollUpOneLine } from ".";
 import { GameState, LetterDetailType, letterType, TypingState } from "../types";
 import { MutableRefObject, Dispatch, SetStateAction } from "react";
 
 export const handleKeyDown = (
   event: React.KeyboardEvent<HTMLDivElement>,
   gameState: GameState,
-  focusLetterCount: MutableRefObject<number>,
   charsPerLine: number,
-  scrollUpOneLine: () => void,
-  GAME_TIME: MutableRefObject<number>,
-  setGameState: Dispatch<SetStateAction<GameState>>,
+  GAME_TIME: number,
+  setGameState: Dispatch<SetStateAction<GameState | undefined>>,
+  gameRef: React.RefObject<HTMLDivElement>,
+  setLineOffset: Dispatch<React.SetStateAction<number>>,
+  focusLetterCount: MutableRefObject<number>,
   setTypingState?: Dispatch<SetStateAction<TypingState>>,
-  typingState?: TypingState
+  typingState?: TypingState,
+  wsConnection?: WebSocket
 ): void => {
   if (gameState.gameStatus === "finished") return;
 
@@ -19,22 +22,29 @@ export const handleKeyDown = (
   const isSpace = key === " ";
   const isBackspace = key === "Backspace";
 
-  if (focusLetterCount.current > charsPerLine) scrollUpOneLine();
+  if (focusLetterCount.current > charsPerLine)
+    scrollUpOneLine(gameRef, setLineOffset, focusLetterCount);
 
   if (gameState.gameStatus === "waiting" && isLetter) {
-    setGameState((prev) => ({
-      ...prev,
-      gameStatus: "playing",
-      startTimestamp: Date.now(),
-      endTimestamp: Date.now() + GAME_TIME.current * 1000,
-    }));
+    setGameState((prev) => {
+      if (!prev) return;
+      return {
+        ...prev,
+        gameStatus: "playing",
+        startTimestamp: Date.now(),
+        endTimestamp: Date.now() + GAME_TIME * 1000,
+      };
+    });
     if (setTypingState)
       setTypingState((prev) => ({
         ...prev,
         startTimestamp: Date.now(),
-        endTimestamp: Date.now() + GAME_TIME.current * 1000,
+        endTimestamp: Date.now() + GAME_TIME * 1000,
         letterDetails: [],
       }));
+  }
+  if (wsConnection) {
+    //send the request
   }
   // if (!typingState.startTimestamp && !typingState.endTimestamp) return;
 
@@ -83,6 +93,7 @@ export const handleKeyDown = (
 
     //update words with its currosponding classes and update the current letter index
     setGameState((prev) => {
+      if (!prev) return;
       const updatedWords = [...prev.words];
       updatedWords[prev.currentWordIndex] = currentWord;
       return {
@@ -114,11 +125,14 @@ export const handleKeyDown = (
           ],
           correctLetterCount: prev.correctLetterCount + 1,
         }));
-      setGameState((prev) => ({
-        ...prev,
-        currentWordIndex: prev.currentWordIndex + 1,
-        currentLetterIndex: 0,
-      }));
+      setGameState((prev) => {
+        if (!prev) return;
+        return {
+          ...prev,
+          currentWordIndex: prev.currentWordIndex + 1,
+          currentLetterIndex: 0,
+        };
+      });
       return;
     }
     const currentLetter = currentWord[gameState.currentLetterIndex];
@@ -138,6 +152,7 @@ export const handleKeyDown = (
         errorCount: prev.errorCount + 1,
       }));
     setGameState((prev) => {
+      if (!prev) return;
       const updatedWords = [...prev.words];
       updatedWords[prev.currentWordIndex] = currentWord;
       return {
@@ -177,6 +192,7 @@ export const handleKeyDown = (
       ) {
         //remove the last letter of the current word
         setGameState((prev) => {
+          if (!prev) return;
           const updatedWords = prev.words.map((word, index) =>
             index === prev.currentWordIndex ? [...word] : word
           );
@@ -193,6 +209,7 @@ export const handleKeyDown = (
       }
 
       setGameState((prev) => {
+        if (!prev) return;
         const updatedWords = prev.words.map((word, index) =>
           index === prev.currentWordIndex
             ? word.map((letter, i) =>
@@ -213,10 +230,13 @@ export const handleKeyDown = (
       return;
     }
     addRemoveRecordToTypingState(LetterDetailType.previous);
-    setGameState((prev) => ({
-      ...prev,
-      currentWordIndex: prev.currentWordIndex - 1,
-      currentLetterIndex: prev.words[prev.currentWordIndex - 1].length || 0,
-    }));
+    setGameState((prev) => {
+      if (!prev) return;
+      return {
+        ...prev,
+        currentWordIndex: prev.currentWordIndex - 1,
+        currentLetterIndex: prev.words[prev.currentWordIndex - 1].length || 0,
+      };
+    });
   }
 };

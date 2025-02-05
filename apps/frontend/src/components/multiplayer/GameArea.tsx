@@ -1,25 +1,54 @@
 import { useRef, useEffect, useState } from "react";
 import { GameState, letterType } from "../../types";
+import { handleKeyDown } from "../../utils/handleKeyDown";
 
 function GameArea({
-  gameData,
-  setGameData,
+  gameState,
+  setGameState,
   wsConnection,
-  timer,
   totalTime,
 }: {
-  gameData: GameState;
-  setGameData: React.Dispatch<React.SetStateAction<GameState | undefined>>;
+  gameState: GameState;
+  setGameState: React.Dispatch<React.SetStateAction<GameState | undefined>>;
   wsConnection: WebSocket;
-  timer: number;
   totalTime: number;
 }) {
   const gameRef = useRef<HTMLDivElement | null>(null);
+  const [lineOffset, setLineOffset] = useState(0);
+  const [charsPerLine, setCharsPerLine] = useState(0); //approx character in every 2 linesearly
+  const focusLetterCount = useRef(0);
+
+  useEffect(() => {
+    if (gameRef.current) {
+      const calculateCharsPerLine = () => {
+        const containerWidth = gameRef.current
+          ? gameRef.current.getBoundingClientRect().width
+          : 0;
+
+        const charWidth = 15.2;
+
+        const calculatedCharsPerLine =
+          Math.floor(containerWidth / charWidth) * 2;
+        setCharsPerLine(calculatedCharsPerLine);
+      };
+
+      // Initial calculation
+      calculateCharsPerLine();
+
+      // Handle window resizing
+      window.addEventListener("resize", calculateCharsPerLine);
+
+      // Cleanup
+      return () => {
+        window.removeEventListener("resize", calculateCharsPerLine);
+      };
+    }
+  }, []);
 
   useEffect(() => {
     const checkFocus = () => {
       if (gameRef.current === document.activeElement) {
-        setGameData((prev) => {
+        setGameState((prev) => {
           if (!prev) return prev;
           const updatedWords = { ...prev, focus: true };
           console.log("In focus : ", updatedWords.focus);
@@ -29,7 +58,7 @@ function GameArea({
         console.log("Game div is in focus");
       } else {
         console.log("Game div is not in focus");
-        setGameData((prev) => {
+        setGameState((prev) => {
           if (!prev) return prev;
           const updatedWords = { ...prev, focus: false };
           console.log("Out of focus : ", updatedWords.focus);
@@ -47,9 +76,9 @@ function GameArea({
   }, []);
 
   useEffect(() => {
-    if (gameData.gameStatus === "playing") {
+    if (gameState.gameStatus === "playing") {
       const timer = setInterval(() => {
-        setGameData((prev) => {
+        setGameState((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
@@ -57,9 +86,9 @@ function GameArea({
           };
         });
 
-        if (gameData.timeLeft <= 1) {
+        if (gameState.timeLeft <= 1) {
           clearInterval(timer);
-          setGameData((prev) => {
+          setGameState((prev) => {
             if (!prev) return prev;
             return { ...prev, gameStatus: "finished" };
           });
@@ -69,15 +98,15 @@ function GameArea({
         clearInterval(timer);
       };
     }
-  }, [gameData.gameStatus, gameData.timeLeft]);
+  }, [gameState.gameStatus, gameState.timeLeft]);
 
   useEffect(() => {
-    if (gameData.gameStatus === "finished") {
+    if (gameState.gameStatus === "finished") {
       const wordsTyped =
-        gameData.currentWordIndex +
-        gameData.currentLetterIndex /
-          gameData.words[gameData.currentWordIndex]?.length;
-      setGameData((prev) => {
+        gameState.currentWordIndex +
+        gameState.currentLetterIndex /
+          gameState.words[gameState.currentWordIndex]?.length;
+      setGameState((prev) => {
         if (!prev) return prev;
         return {
           ...prev,
@@ -85,190 +114,86 @@ function GameArea({
         };
       });
     }
-  }, [gameData.gameStatus]);
+  }, [gameState.gameStatus]);
 
-  const handleKeyUp = (event: React.KeyboardEvent<HTMLDivElement>): void => {
-    if (gameData.gameStatus === "finished") return;
-
-    const { key } = event;
-    const isLetter = key.length === 1 && key !== " ";
-    const isSpace = key === " ";
-    const isBackspace = key === "Backspace";
-
-    if (gameData.gameStatus === "waiting" && isLetter) {
-      setGameData((prev) => {
-        if (!prev) return prev;
-        return { ...prev, gameStatus: "playing" };
-      });
-    }
-
-    const currentWord = gameData.words[gameData.currentWordIndex];
-    if (!currentWord) return;
-
-    if (isLetter) {
-      const currentLetter = currentWord[gameData.currentLetterIndex];
-
-      if (!currentLetter) {
-        currentWord.push({ letter: key, type: letterType.extra });
-      } else if (currentLetter.letter === key) {
-        currentLetter.type = letterType.correct;
-      } else {
-        currentLetter.type = letterType.incorrect;
-      }
-
-      setGameData((prev) => {
-        if (!prev) return prev;
-        const updatedWords = [...prev.words];
-        updatedWords[prev.currentWordIndex] = currentWord;
-        return {
-          ...prev,
-          words: updatedWords,
-          currentLetterIndex: prev.currentLetterIndex + 1,
-        };
-      });
-    }
-
-    if (isSpace) {
-      if (
-        gameData.currentLetterIndex >=
-        gameData.words[gameData.currentWordIndex].length
-      ) {
-        setGameData((prev) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            currentWordIndex: prev.currentWordIndex + 1,
-            currentLetterIndex: 0,
-          };
-        });
-        return;
-      }
-    }
-
-    if (isBackspace) {
-      const currentLetterIndex = gameData.currentLetterIndex - 1;
-
-      if (currentLetterIndex < 0 && gameData.currentWordIndex === 0) return;
-
-      if (currentLetterIndex >= 0) {
-        if (
-          currentLetterIndex >
-          gameData.originalWords[gameData.currentWordIndex].length - 1
-        ) {
-          //remove the last letter of the current word
-          setGameData((prev) => {
-            if (!prev) return prev;
-            const updatedWords = prev.words.map((word, index) =>
-              index === prev.currentWordIndex ? [...word] : word
-            );
-            updatedWords[prev.currentWordIndex].splice(currentLetterIndex, 1);
-
-            return {
-              ...prev,
-              words: updatedWords,
-              currentLetterIndex: prev.currentLetterIndex - 1,
-            };
-          });
-          return;
-        }
-
-        setGameData((prev) => {
-          if (!prev) return prev;
-          const updatedWords = prev.words.map((word, index) =>
-            index === prev.currentWordIndex
-              ? word.map((letter, i) =>
-                  i === currentLetterIndex
-                    ? { ...letter, type: letterType.normal }
-                    : letter
-                )
-              : word
-          );
-
-          return {
-            ...prev,
-            words: updatedWords,
-            currentLetterIndex: prev.currentLetterIndex - 1,
-          };
-        });
-        return;
-      }
-      setGameData((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          currentWordIndex: prev.currentWordIndex - 1,
-          currentLetterIndex: prev.words[prev.currentWordIndex - 1].length || 0,
-        };
-      });
-    }
-  };
-
-  return (
-    <div>
-      <div className="flex justify-between select-none items-center mb-8">
-        <div className="text-yellow-400 text-xl">
-          {gameData.gameStatus === "finished"
-            ? `WPM: ${gameData.wpm}`
-            : gameData.gameStatus === "waiting"
-              ? `Starts in : ${timer}`
-              : gameData.timeLeft}
+  if (gameState) {
+    return (
+      <div>
+        <div className="flex justify-between select-none items-center mb-8">
+          <div className="text-yellow-400 text-xl">{gameState.timeLeft}</div>
         </div>
-      </div>
-      <div
-        className={` relative h-[144px] w-full  ${gameRef.current !== document.activeElement ? "cursor-pointer" : ""} `}
-      >
-        {!gameData.focus && (
+        <div
+          className={` relative h-[144px] w-full  ${gameRef.current !== document.activeElement ? "cursor-pointer" : ""} `}
+        >
+          {!gameState.focus && (
+            <div
+              className="absolute z-50 h-[144px] w-full bg-[rgb(61,61,58,0.1)] backdrop-blur-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                gameRef.current?.focus();
+              }}
+            >
+              <div className="w-full h-full flex items-center justify-center ">
+                Click here to focus.
+              </div>
+            </div>
+          )}
+
           <div
-            className="absolute z-50 h-[144px] w-full bg-[rgb(61,61,58,0.1)] backdrop-blur-sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              gameRef.current?.focus();
-            }}
+            ref={gameRef}
+            className="game-area h-[144px] overflow-hidden leading-[3rem] focus:outline-none font-robotoMono  text-2xl tracking-wide"
+            tabIndex={0}
+            role="textbox"
+            aria-label="Typing area"
+            onKeyDown={(event) =>
+              handleKeyDown(
+                event,
+                gameState,
+                charsPerLine,
+                totalTime,
+                setGameState,
+                gameRef,
+                setLineOffset,
+                focusLetterCount
+              )
+            }
           >
-            <div className="w-full h-full flex items-center justify-center ">
-              Click here to focus.
+            <div
+              className="text-container select-none text-textSecondary"
+              style={{ transform: `translateY(-${lineOffset}px)` }}
+            >
+              {gameState.words.map((word, wordIndex) => (
+                <div key={wordIndex} className={`word inline-block mx-1`}>
+                  {word.map((data, letterIndex) => (
+                    <span key={letterIndex} className={`letter ${data.type}`}>
+                      {wordIndex === gameState.currentWordIndex &&
+                      letterIndex === gameState.currentLetterIndex ? (
+                        <span
+                          className={`blinking-cursor ${
+                            gameState.gameStatus === "playing" ? "" : "blink"
+                          }`}
+                        ></span>
+                      ) : null}
+                      {data.letter}
+                    </span>
+                  ))}
+                  {wordIndex === gameState.currentWordIndex &&
+                    gameState.currentLetterIndex >=
+                      gameState.words[gameState.currentWordIndex].length && (
+                      <span
+                        className={`blinking-cursor ${
+                          gameState.gameStatus === "playing" ? "" : "blink"
+                        }`}
+                      ></span>
+                    )}
+                </div>
+              ))}
             </div>
           </div>
-        )}
-
-        <div
-          ref={gameRef}
-          className={`game-area h-[144px] overflow-hidden leading-[3rem] focus:outline-none font-robotoMono  text-2xl tracking-wide ${
-            gameData.gameStatus === "finished" ? "opacity-40" : ""
-          }`}
-          tabIndex={0}
-          role="textbox"
-          aria-label="Typing area"
-          onKeyDown={handleKeyUp}
-        >
-          <div className="text-container select-none text-textSecondary">
-            {gameData.words.map((word, wordIndex) => (
-              <div key={wordIndex} className={`word inline-block mx-1`}>
-                {word.map((data, letterIndex) => (
-                  <span key={letterIndex} className={`letter ${data.type}`}>
-                    {wordIndex === gameData.currentWordIndex &&
-                    letterIndex === gameData.currentLetterIndex ? (
-                      <span
-                        className={`blinking-cursor ${gameData.gameStatus === "playing" ? "" : "blink"}`}
-                      ></span>
-                    ) : null}
-                    {data.letter}
-                  </span>
-                ))}
-                {wordIndex === gameData.currentWordIndex &&
-                  gameData.currentLetterIndex >=
-                    gameData.words[gameData.currentWordIndex].length && (
-                    <span
-                      className={`blinking-cursor ${gameData.gameStatus === "playing" ? "" : "blink"}`}
-                    ></span>
-                  )}
-              </div>
-            ))}
-          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
 
 export default GameArea;

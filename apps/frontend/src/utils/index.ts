@@ -283,3 +283,15 @@ export const showToastSuccess = (message: string) => {
   toast.dismiss();
   toast.success(message, ToastStlye);
 };
+
+export const scrollUpOneLine = (
+  gameRef: React.RefObject<HTMLDivElement>,
+  setLineOffset: React.Dispatch<React.SetStateAction<number>>,
+  focusLetterCount: React.MutableRefObject<number>
+) => {
+  const lineHeight = 48;
+
+  gameRef.current?.focus();
+  setLineOffset((prev) => prev + lineHeight);
+  focusLetterCount.current = Math.round(focusLetterCount.current / 2);
+};

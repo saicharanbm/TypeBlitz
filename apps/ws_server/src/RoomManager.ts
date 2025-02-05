@@ -114,12 +114,14 @@ export class RoomManager {
     room.progress = gameProgress.starting;
 
     room.startTime = Date.now() + 5000;
+    room.endTime = room.startTime + room.time * 1000;
     this.broadcastMessage(roomId, {
       type: "game-status-start",
       payload: {
         message: "The game starts in 5 seconds!",
         words: room.words,
         startTime: room.startTime,
+        endTime: room.endTime,
       },
     });
     // // Countdown from 10 seconds

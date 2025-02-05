@@ -25,7 +25,9 @@ function Multiplayer() {
   const [roomDetails, setRoomDetails] = useState<roomDetailsType>();
   const roomDetailsRef = useRef<roomDetailsType>();
   const [gameData, setGameData] = useState<GameState>();
-  const [timer, setTimer] = useState<number>(10);
+  const START_TIME = useRef<number | null>();
+  const END_TIME = useRef<number | null>();
+
   const userId = useRef(uuid());
 
   const connectWebSocket = () => {
@@ -91,26 +93,39 @@ function Multiplayer() {
             showToastError("Admin has left the room. Room closed.");
             break;
           case "game-status-start": {
-            const { message, words } = data.payload;
+            const { message, words, startTime, endTime } = data.payload;
+            if (
+              !message ||
+              !words ||
+              words.lenght === 0 ||
+              typeof startTime !== "number" ||
+              typeof endTime !== "number"
+            ) {
+              showToastError("Something went wrong while entering the game.");
+            }
+            console.log("game details :", message, startTime, endTime);
+
+            START_TIME.current = startTime;
+            END_TIME.current = endTime;
             initializeGame(words);
             showToastSuccess(message);
             break;
           }
-          case "countdown": {
-            const { secondsLeft } = data.payload;
-            if (secondsLeft) setTimer(secondsLeft);
-            break;
-          }
-          case "game-status-play": {
-            setGameData((prev) => {
-              if (!prev) return;
-              return {
-                ...prev,
-                gameStatus: "playing",
-              };
-            });
-            break;
-          }
+          // case "countdown": {
+          //   const { secondsLeft } = data.payload;
+          //   if (secondsLeft) setTimer(secondsLeft);
+          //   break;
+          // }
+          // case "game-status-play": {
+          //   setGameData((prev) => {
+          //     if (!prev) return;
+          //     return {
+          //       ...prev,
+          //       gameStatus: "playing",
+          //     };
+          //   });
+          //   break;
+          // }
           default:
             console.warn("Unknown message type:", data.type);
         }
@@ -154,7 +169,6 @@ function Multiplayer() {
 
   const initializeGame = (words: string[]): void => {
     const currentRoomDetails = roomDetailsRef.current;
-    console.log("Current room details from ref:", currentRoomDetails);
 
     if (!currentRoomDetails) return;
 
@@ -170,7 +184,6 @@ function Multiplayer() {
       gameStatus: "waiting",
       timeLeft: currentRoomDetails.time,
       focus: true,
-      wpm: 0,
     });
   };
 
@@ -193,9 +206,8 @@ function Multiplayer() {
   if (gameData && wsConnection.current) {
     return (
       <GameArea
-        gameData={gameData}
-        setGameData={setGameData}
-        timer={timer}
+        gameState={gameData}
+        setGameState={setGameData}
         wsConnection={wsConnection.current}
         totalTime={roomDetails?.time || 60}
       />
