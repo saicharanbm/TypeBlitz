@@ -109,6 +109,35 @@ function Multiplayer() {
             END_TIME.current = endTime;
             initializeGame(words);
             showToastSuccess(message);
+
+            // Calculate delay until the game should start
+            const delay = startTime - Date.now();
+
+            if (delay > 0) {
+              // Wait until start time and then set game status to 'playing'
+              setTimeout(() => {
+                setGameData((prev) => {
+                  if (!prev) return prev;
+                  return {
+                    ...prev,
+                    gameStatus: "playing",
+                    focus: true,
+                  };
+                });
+                showToastSuccess("Game has started!");
+              }, delay);
+            } else {
+              // If start time has already passed, start the game immediately
+              setGameData((prev) => {
+                if (!prev) return prev;
+                return {
+                  ...prev,
+                  gameStatus: "playing",
+                  focus: true,
+                };
+              });
+              showToastSuccess("Game has started!");
+            }
             break;
           }
 
@@ -169,7 +198,7 @@ function Multiplayer() {
       currentLetterIndex: 0,
       gameStatus: "waiting",
       timeLeft: currentRoomDetails.time,
-      focus: true,
+      focus: false,
     });
   };
 

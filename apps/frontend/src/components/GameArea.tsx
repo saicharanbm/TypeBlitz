@@ -29,35 +29,8 @@ function GameArea() {
 
   const gameRef = useRef<HTMLDivElement | null>(null);
   const [lineOffset, setLineOffset] = useState(0);
-  const [charsPerLine, setCharsPerLine] = useState(0); //approx character in every 2 linesearly
+  // const [charsPerLine, setCharsPerLine] = useState(0); //approx character in every 2 linesearly
   const focusLetterCount = useRef(0);
-  //claculate chars per line
-  useEffect(() => {
-    if (gameRef.current) {
-      const calculateCharsPerLine = () => {
-        const containerWidth = gameRef.current
-          ? gameRef.current.getBoundingClientRect().width
-          : 0;
-
-        const charWidth = 15.2;
-
-        const calculatedCharsPerLine =
-          Math.floor(containerWidth / charWidth) * 2;
-        setCharsPerLine(calculatedCharsPerLine);
-      };
-
-      // Initial calculation
-      calculateCharsPerLine();
-
-      // Handle window resizing
-      window.addEventListener("resize", calculateCharsPerLine);
-
-      // Cleanup
-      return () => {
-        window.removeEventListener("resize", calculateCharsPerLine);
-      };
-    }
-  }, []);
 
   const initializeGame = useCallback((): void => {
     const newOriginalWords = Array.from({ length: 200 }, () => {
@@ -92,36 +65,6 @@ function GameArea() {
   useEffect(() => {
     initializeGame();
   }, [initializeGame]);
-
-  useEffect(() => {
-    const checkFocus = () => {
-      if (gameRef.current === document.activeElement) {
-        setGameState((prev) => {
-          if (!prev) return;
-          const updatedWords = { ...prev, focus: true };
-          console.log("In focus : ", updatedWords.focus);
-          return updatedWords;
-        });
-
-        console.log("Game div is in focus");
-      } else {
-        console.log("Game div is not in focus");
-        setGameState((prev) => {
-          if (!prev) return;
-          const updatedWords = { ...prev, focus: false };
-          console.log("Out of focus : ", updatedWords.focus);
-          return updatedWords;
-        });
-      }
-    };
-    document.addEventListener("focusin", checkFocus);
-    document.addEventListener("focusout", checkFocus);
-
-    return () => {
-      document.removeEventListener("focusin", checkFocus);
-      document.removeEventListener("focusout", checkFocus);
-    };
-  }, []);
 
   useEffect(() => {
     if (gameState?.gameStatus === "playing") {
@@ -175,7 +118,6 @@ function GameArea() {
           gameState={gameState}
           setGameState={setGameState}
           gameRef={gameRef}
-          charsPerLine={charsPerLine}
           totalTime={GAME_TIME.current}
           focusLetterCount={focusLetterCount}
           lineOffset={lineOffset}
