@@ -52,8 +52,18 @@ export const handleKeyDown = (
         letterDetails: [],
       }));
   }
-  if (wsConnection) {
+  if (wsConnection && (isLetter || isBackspace || isSpace)) {
     //send the request
+    wsConnection.send(
+      JSON.stringify({
+        type: "handle-Key-down",
+        payload: {
+          key,
+          wordIndex: gameState.currentWordIndex,
+          letterIndex: gameState.currentLetterIndex,
+        },
+      })
+    );
   }
   // if (!typingState.startTimestamp && !typingState.endTimestamp) return;
 

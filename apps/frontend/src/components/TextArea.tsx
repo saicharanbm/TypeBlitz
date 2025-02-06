@@ -48,7 +48,6 @@ function TextArea({
           Math.floor(containerWidth / charWidth) * 2;
         setCharsPerLine(calculatedCharsPerLine);
       };
-      console.log("gameRef.current", gameRef.current);
 
       // Initial calculation
       calculateCharsPerLine();
@@ -68,17 +67,13 @@ function TextArea({
         setGameState((prev) => {
           if (!prev) return;
           const updatedWords = { ...prev, focus: true };
-          console.log("In focus : ", updatedWords.focus);
           return updatedWords;
         });
-
-        console.log("Game div is in focus");
       } else {
-        console.log("Game div is not in focus");
+        if (gameState.gameStatus === "finished") return;
         setGameState((prev) => {
           if (!prev) return;
           const updatedWords = { ...prev, focus: false };
-          console.log("Out of focus : ", updatedWords.focus);
           return updatedWords;
         });
       }
@@ -100,11 +95,16 @@ function TextArea({
           className="absolute z-50 h-[144px] w-full bg-[rgb(61,61,58,0.1)] backdrop-blur-sm"
           onClick={(e) => {
             e.stopPropagation();
+            if (wsConnection && gameState.gameStatus !== "playing") {
+              return;
+            }
             gameRef.current?.focus();
           }}
         >
           <div className="w-full h-full flex items-center justify-center ">
-            Click here to focus.
+            {wsConnection && gameState.gameStatus !== "playing"
+              ? "Wait for the game to start"
+              : "Click here to focus."}
           </div>
         </div>
       )}

@@ -29,7 +29,6 @@ function GameArea() {
 
   const gameRef = useRef<HTMLDivElement | null>(null);
   const [lineOffset, setLineOffset] = useState(0);
-  // const [charsPerLine, setCharsPerLine] = useState(0); //approx character in every 2 linesearly
   const focusLetterCount = useRef(0);
 
   const initializeGame = useCallback((): void => {

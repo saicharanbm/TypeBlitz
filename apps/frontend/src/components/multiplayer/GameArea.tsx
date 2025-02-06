@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { GameState } from "../../types";
 import TextArea from "../TextArea";
+import { showToastSuccess } from "../../utils";
 
 function GameArea({
   gameState,
@@ -14,13 +15,19 @@ function GameArea({
   totalTime: number;
 }) {
   const gameRef = useRef<HTMLDivElement | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval>>();
   const [lineOffset, setLineOffset] = useState(0);
   const focusLetterCount = useRef(0);
 
   //Time while Playing
   useEffect(() => {
+    if (gameState.gameStatus === "finished") {
+      clearInterval(timerRef.current);
+      return;
+    }
     if (gameState.gameStatus === "playing") {
-      const timer = setInterval(() => {
+      gameRef.current?.focus();
+      timerRef.current = setInterval(() => {
         setGameState((prev) => {
           if (!prev) return prev;
           return {
@@ -30,11 +37,12 @@ function GameArea({
         });
 
         if (gameState.timeLeft <= 1) {
-          clearInterval(timer);
+          clearInterval(timerRef.current);
           setGameState((prev) => {
             if (!prev) return prev;
             return { ...prev, gameStatus: "finished" };
           });
+          showToastSuccess("Game Finished waiting for other players.");
           wsConnection.send(
             JSON.stringify({
               type: "update-GameStatus",
@@ -46,7 +54,7 @@ function GameArea({
         }
       }, 1000);
       return () => {
-        clearInterval(timer);
+        clearInterval(timerRef.current);
       };
     }
   }, [gameState.gameStatus, gameState.timeLeft, setGameState, wsConnection]);
@@ -55,7 +63,15 @@ function GameArea({
     return (
       <div>
         <div className="flex justify-between select-none items-center mb-8">
-          <div className="text-yellow-400 text-xl">{gameState.timeLeft}</div>
+          {gameState.gameStatus === "playing" ? (
+            <div className="text-yellow-400 text-xl">{gameState.timeLeft}</div>
+          ) : gameState.gameStatus === "finished" ? (
+            <div className="text-yellow-400 text-xl">Game Finished.</div>
+          ) : (
+            <div className="text-yellow-400 text-xl">
+              Wait for the game to start
+            </div>
+          )}
         </div>
 
         <TextArea

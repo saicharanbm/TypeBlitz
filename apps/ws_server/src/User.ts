@@ -207,12 +207,32 @@ export class User {
         }
         case "handle-Key-down": {
           const { key, wordIndex, letterIndex } = data.payload;
-          console.log("handle key down :", key, wordIndex, letterIndex);
+          if (
+            !key ||
+            typeof wordIndex !== "number" ||
+            typeof letterIndex !== "number" ||
+            wordIndex < 0 ||
+            wordIndex >= 400 ||
+            letterIndex < 0
+          )
+            return;
+          console.log(this.status);
+          if (this.status !== "playing") return;
+
           const RoomManagerInstance = RoomManager.getInstance();
+          RoomManagerInstance.handleKeyDown(
+            this.roomId,
+            this.id,
+            key,
+            wordIndex,
+            letterIndex
+          );
           break;
         }
         case "update-GameStatus": {
           const { type } = data.payload;
+          if (type !== "playing" && type !== "finished") return;
+          this.status = type;
           console.log("update game status", type);
           break;
         }

@@ -112,10 +112,21 @@ function Multiplayer() {
 
             // Calculate delay until the game should start
             const delay = startTime - Date.now();
+            const updateGameStatus = () => {
+              ws.send(
+                JSON.stringify({
+                  type: "update-GameStatus",
+                  payload: {
+                    type: "playing",
+                  },
+                })
+              );
+            };
 
             if (delay > 0) {
               // Wait until start time and then set game status to 'playing'
               setTimeout(() => {
+                updateGameStatus();
                 setGameData((prev) => {
                   if (!prev) return prev;
                   return {
@@ -128,6 +139,7 @@ function Multiplayer() {
               }, delay);
             } else {
               // If start time has already passed, start the game immediately
+              updateGameStatus();
               setGameData((prev) => {
                 if (!prev) return prev;
                 return {

@@ -21,6 +21,7 @@ export class RoomManager {
       });
     }
   }
+
   verifyIfRoomExist(roomId: string): boolean {
     if (this.rooms.has(roomId)) return true;
     return false;
@@ -125,6 +126,135 @@ export class RoomManager {
       },
     });
   }
+
+  handleKeyDown(
+    roomId: string,
+    userId: string,
+    key: string,
+    currentWordIndex: number,
+    currentLetterIndex: number
+  ) {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      return;
+    }
+    if (!room.startTime || !room.endTime) return;
+    //check if the game is active
+    if (room.progress! === gameProgress.playing || Date.now() < room.startTime)
+      return;
+
+    if (Date.now() > room.endTime) {
+      room.progress = gameProgress.finished;
+
+      this.broadcastMessage(roomId, { type: "game-finished" });
+      return;
+    }
+
+    const user = room.users.find((u) => u.id === userId);
+    if (!user) return;
+    // console.log("handling key down", key);
+
+    const currentWord = room.words[currentWordIndex];
+
+    if (!currentWord) {
+      return;
+    }
+    const currentLetter = currentWord[currentLetterIndex];
+    // Handle space key
+    if (key === " ") {
+      if (currentLetterIndex >= currentWord.length) {
+        user.sendMessage({ type: "next-word" });
+      } else {
+        user.sendMessage({ type: "wrong-letter" });
+      }
+      return;
+    }
+
+    // Handle backspace key
+    if (key === "Backspace") {
+      if (currentLetterIndex === 0) {
+        if (currentWordIndex > 0) {
+          user.sendMessage({ type: "previous-word" });
+        } else {
+          return;
+        }
+      } else if (currentLetterIndex <= currentWord.length) {
+        user.sendMessage({ type: "remove-letter" });
+      } else {
+        user.sendMessage({ type: "remove-extra-letter" });
+      }
+
+      return;
+    }
+
+    // Handle normal letter input
+    if (currentLetterIndex >= currentWord.length) {
+      user.sendMessage({ type: "extra-letter" });
+    } else if (currentLetter === key) {
+      user.sendMessage({ type: "correct-letter" });
+    } else {
+      user.sendMessage({ type: "wrong-letter" });
+    }
+  }
+
+  //   if (currentLetterIndex >= currentWord.length) {
+  //     if (key === " ") {
+  //       user.sendMessage({
+  //         type: "next-word",
+  //       });
+  //       return;
+  //     }
+  //     if (key === "Backspace") {
+  //       if (currentLetterIndex === currentWord.length) {
+  //         user.sendMessage({
+  //           type: "remove-letter",
+  //         });
+  //         return;
+  //       }
+  //       user.sendMessage({
+  //         type: "remove-extra-letter",
+  //       });
+  //       return;
+  //     }
+  //     user.sendMessage({
+  //       type: "extra-letter",
+  //     });
+  //     return;
+  //   }
+  //   console.log("currentLetter", currentLetter);
+
+  //   if (key === " ") {
+  //     user.sendMessage({
+  //       type: "wrong-letter",
+  //     });
+  //     return;
+  //   }
+  //   if (key === "Backspace") {
+  //     if (currentLetterIndex === 0 && currentWordIndex === 0) {
+  //       return;
+  //     }
+  //     if (currentLetterIndex === 0) {
+  //       user.sendMessage({
+  //         type: "previous-word",
+  //       });
+  //       return;
+  //     }
+  //     user.sendMessage({
+  //       type: "remove-letter",
+  //     });
+  //     return;
+  //   }
+  //   if (currentLetter === key) {
+  //     user.sendMessage({
+  //       type: "correct-letter",
+  //     });
+  //     return;
+  //   }
+  //   user.sendMessage({
+  //     type: "wrong-letter",
+  //   });
+  //   return;
+  // }
 
   createRoom(user: User) {
     const roomId = generateRoomId();
