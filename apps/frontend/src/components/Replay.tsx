@@ -37,7 +37,7 @@ function Replay({
   const playerPosition = useRef(0);
   const playerTimer = useRef<ReturnType<typeof setTimeout>>();
   const typeTimer = useRef<ReturnType<typeof setInterval>>();
-  const timerCount = useRef<number>(0);
+  const [timerCount, SetTimerCount] = useState<number>(0);
   const [wpm, setWPM] = useState(0);
   const initializePlayer = useCallback(() => {
     const data = generateReplayWords(words, typingData);
@@ -58,16 +58,15 @@ function Replay({
 
   const runTimer = () => {
     typeTimer.current = setInterval(() => {
-      if (timerCount.current >= totalTime) {
+      if (timerCount >= totalTime) {
         clearInterval(typeTimer.current);
         return; // Exit after clearing the interval
       }
 
-      if (graphData[timerCount.current]) {
-        setWPM(graphData[timerCount.current].correctWPM);
+      if (graphData[timerCount]) {
+        setWPM(graphData[timerCount].correctWPM);
       }
-
-      timerCount.current += 1;
+      SetTimerCount((prev) => prev + 1);
     }, 1000);
   };
 
@@ -230,7 +229,7 @@ function Replay({
     playerPosition.current = 0;
     if (playerTimer.current) clearTimeout(playerTimer.current);
     clearInterval(typeTimer.current);
-    timerCount.current = 0;
+    SetTimerCount(0);
     setWPM(0);
     startReplay();
   };
@@ -262,9 +261,7 @@ function Replay({
             strokeWidth={3}
           />
           <p className="text-primaryColor font-robotoMono">{wpm}wpm</p>
-          <p className="text-primaryColor font-robotoMono">
-            {timerCount.current}
-          </p>
+          <p className="text-primaryColor font-robotoMono">{timerCount}</p>
         </div>
 
         <div className="leading-[3rem] focus:outline-none font-robotoMono  text-2xl tracking-wide">

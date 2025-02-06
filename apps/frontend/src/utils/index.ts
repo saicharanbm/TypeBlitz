@@ -23,6 +23,8 @@ export const processTypingData = (
   typingState: TypingState,
   totalDuration: number
 ) => {
+  console.log(JSON.stringify(typingState, null, 2));
+  console.log(totalDuration);
   if (
     !typingState.startTimestamp ||
     !typingState.endTimestamp ||
@@ -48,7 +50,10 @@ export const processTypingData = (
   };
 
   // Log input data in a more readable way
-  console.log("Input typing state:", JSON.stringify(typingState, null, 2));
+  console.log(
+    "Input typing state:",
+    JSON.stringify(typingState.letterDetails, null, 2)
+  );
 
   typingState.letterDetails.forEach((data) => {
     const currentTime = Math.ceil(data.timestamp / 1000);

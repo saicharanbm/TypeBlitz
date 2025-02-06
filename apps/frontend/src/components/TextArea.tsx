@@ -70,7 +70,7 @@ function TextArea({
           return updatedWords;
         });
       } else {
-        if (gameState.gameStatus === "finished") return;
+        if (wsConnection && gameState.gameStatus === "finished") return;
         setGameState((prev) => {
           if (!prev) return;
           const updatedWords = { ...prev, focus: false };

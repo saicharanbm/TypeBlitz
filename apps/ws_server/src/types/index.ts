@@ -12,8 +12,8 @@ export enum totalTime {
   onetwenty = 120,
 }
 export type TypingState = {
-  // startTimestamp: number | null;
-  // endTimestamp: number | null;
+  startTimestamp: number | null;
+  endTimestamp: number | null;
   letterDetails: LetterDetail[];
   correctLetterCount: number;
   errorCount: number;

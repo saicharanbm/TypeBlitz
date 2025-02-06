@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import Home from "./Home";
-import { GameState, letterType, roomDetailsType, wsStatus } from "../../types";
+import {
+  GameState,
+  letterType,
+  MultiplayerResult,
+  roomDetailsType,
+  wsStatus,
+} from "../../types";
 import { v4 as uuid } from "uuid";
 import {
   addUserList,
@@ -15,6 +21,7 @@ import {
 import Room from "./Room";
 import ConnectionError from "./ConnectionError";
 import GameArea from "./GameArea";
+import GameResult from "./GameResult";
 
 function Multiplayer() {
   const [connectionStatus, setConnectionStatus] = useState<wsStatus>(
@@ -25,9 +32,9 @@ function Multiplayer() {
   const [roomDetails, setRoomDetails] = useState<roomDetailsType>();
   const roomDetailsRef = useRef<roomDetailsType>();
   const [gameData, setGameData] = useState<GameState>();
-  const START_TIME = useRef<number | null>();
-  const END_TIME = useRef<number | null>();
-
+  const START_TIME = useRef<number>();
+  const END_TIME = useRef<number>();
+  const [contestResult, setContestResult] = useState<MultiplayerResult[]>();
   const userId = useRef(uuid());
 
   const connectWebSocket = () => {
@@ -152,6 +159,22 @@ function Multiplayer() {
             }
             break;
           }
+          case "game-finished": {
+            const { usersTypingState } = data.payload;
+            console.log(usersTypingState);
+
+            setGameData((prev) => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                gameStatus: "finished",
+                focus: true,
+              };
+            });
+            setContestResult(usersTypingState);
+
+            break;
+          }
 
           default:
             console.warn("Unknown message type:", data.type);
@@ -227,6 +250,25 @@ function Multiplayer() {
     return (
       <div className="w-full p-28 flex flex-col items-center justify-center">
         <p>Loading...</p>
+      </div>
+    );
+  }
+  if (
+    gameData?.gameStatus === "finished" &&
+    contestResult &&
+    contestResult.length > 0 &&
+    roomDetails &&
+    START_TIME.current &&
+    END_TIME.current
+  ) {
+    return (
+      <div>
+        <GameResult
+          words={gameData.originalWords}
+          contestResult={contestResult}
+          totalTime={roomDetails?.time || 60}
+          difficulty={roomDetails?.difficulty}
+        />
       </div>
     );
   }

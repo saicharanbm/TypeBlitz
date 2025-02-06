@@ -134,3 +134,9 @@ export type CustomDotProps = {
   cy?: number;
   value?: number;
 };
+
+export type MultiplayerResult = {
+  userId: string;
+  name: string;
+  typingState: TypingState;
+};

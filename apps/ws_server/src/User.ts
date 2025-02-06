@@ -10,6 +10,8 @@ export class User {
   displayName: string = "";
   status: "idle" | "playing" | "finished" = "idle";
   typingState: TypingState = {
+    startTimestamp: null,
+    endTimestamp: null,
     letterDetails: [],
     correctLetterCount: 0,
     errorCount: 0,
@@ -232,7 +234,11 @@ export class User {
         case "update-GameStatus": {
           const { type } = data.payload;
           if (type !== "playing" && type !== "finished") return;
-          this.status = type;
+          if (type === "playing") {
+            this.status = type;
+            return;
+          }
+          RoomManager.getInstance().updateUserStatus(this.roomId, this.id);
           console.log("update game status", type);
           break;
         }

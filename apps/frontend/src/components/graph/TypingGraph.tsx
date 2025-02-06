@@ -26,7 +26,7 @@ const TypingGraph = ({
   typingState: TypingState;
   totalTime: number;
   difficulty: wordDifficulty;
-  initializeGame: () => void;
+  initializeGame?: () => void;
 }) => {
   const [showReplay, setShowReplay] = useState(false);
   const typingData = processTypingData(typingState, totalTime);

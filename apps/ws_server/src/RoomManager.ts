@@ -1,6 +1,12 @@
 import { User } from "./User";
 import { generateRoomId, getRandomWord } from "./utils";
-import { gameProgress, roomDetails, totalTime, wordDifficulty } from "./types";
+import {
+  gameProgress,
+  LetterDetailType,
+  roomDetails,
+  totalTime,
+  wordDifficulty,
+} from "./types";
 
 export class RoomManager {
   rooms: Map<string, roomDetails> = new Map<string, roomDetails>();
@@ -126,6 +132,31 @@ export class RoomManager {
       },
     });
   }
+  announceResult(roomId: string) {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      return;
+    }
+    if (!room.startTime || !room.endTime) return;
+
+    const usersTypingState = room.users.map((user) => {
+      return {
+        userId: user.id,
+        name: user.displayName,
+        typingState: {
+          ...user.typingState,
+          endTimestamp: room.endTime,
+          startTimestamp: room.startTime,
+        },
+      };
+    });
+
+    this.broadcastMessage(roomId, {
+      type: "game-finished",
+      payload: { usersTypingState },
+    });
+    return;
+  }
 
   handleKeyDown(
     roomId: string,
@@ -140,13 +171,13 @@ export class RoomManager {
     }
     if (!room.startTime || !room.endTime) return;
     //check if the game is active
-    if (room.progress! === gameProgress.playing || Date.now() < room.startTime)
+    const currentTime = Date.now();
+    if (room.progress! === gameProgress.playing || currentTime < room.startTime)
       return;
 
-    if (Date.now() > room.endTime) {
+    if (currentTime > room.endTime) {
       room.progress = gameProgress.finished;
-
-      this.broadcastMessage(roomId, { type: "game-finished" });
+      this.announceResult(roomId);
       return;
     }
 
@@ -155,17 +186,39 @@ export class RoomManager {
     // console.log("handling key down", key);
 
     const currentWord = room.words[currentWordIndex];
+    const timestamp = currentTime - room.startTime;
 
     if (!currentWord) {
       return;
     }
     const currentLetter = currentWord[currentLetterIndex];
+
+    const addEventToLetterDetails = (
+      key: string,
+      type: LetterDetailType,
+      isCorrect: boolean
+    ) => {
+      const event = {
+        letter: key,
+        type,
+        timestamp,
+      };
+
+      user.typingState.letterDetails.push(event);
+      if (isCorrect) {
+        user.typingState.correctLetterCount++;
+      } else {
+        user.typingState.errorCount++;
+      }
+    };
     // Handle space key
     if (key === " ") {
       if (currentLetterIndex >= currentWord.length) {
-        user.sendMessage({ type: "next-word" });
+        // user.sendMessage({ type: "next-word" });
+        addEventToLetterDetails("Space", LetterDetailType.next, true);
       } else {
-        user.sendMessage({ type: "wrong-letter" });
+        // user.sendMessage({ type: "wrong-letter" });
+        addEventToLetterDetails("Space", LetterDetailType.incorrect, false);
       }
       return;
     }
@@ -174,14 +227,25 @@ export class RoomManager {
     if (key === "Backspace") {
       if (currentLetterIndex === 0) {
         if (currentWordIndex > 0) {
-          user.sendMessage({ type: "previous-word" });
+          // user.sendMessage({ type: "previous-word" });
+          addEventToLetterDetails(
+            "BackSpace",
+            LetterDetailType.previous,
+            false
+          );
         } else {
           return;
         }
       } else if (currentLetterIndex <= currentWord.length) {
-        user.sendMessage({ type: "remove-letter" });
+        // user.sendMessage({ type: "remove-letter" });
+        addEventToLetterDetails("BackSpace", LetterDetailType.remove, false);
       } else {
-        user.sendMessage({ type: "remove-extra-letter" });
+        // user.sendMessage({ type: "remove-extra-letter" });
+        addEventToLetterDetails(
+          "BackSpace",
+          LetterDetailType.removeExtra,
+          false
+        );
       }
 
       return;
@@ -189,72 +253,32 @@ export class RoomManager {
 
     // Handle normal letter input
     if (currentLetterIndex >= currentWord.length) {
-      user.sendMessage({ type: "extra-letter" });
+      // user.sendMessage({ type: "extra-letter" });
+      addEventToLetterDetails(key, LetterDetailType.extra, false);
     } else if (currentLetter === key) {
-      user.sendMessage({ type: "correct-letter" });
+      // user.sendMessage({ type: "correct-letter" });
+      addEventToLetterDetails(key, LetterDetailType.correct, true);
     } else {
-      user.sendMessage({ type: "wrong-letter" });
+      // user.sendMessage({ type: "wrong-letter" });
+      addEventToLetterDetails(key, LetterDetailType.incorrect, false);
     }
   }
 
-  //   if (currentLetterIndex >= currentWord.length) {
-  //     if (key === " ") {
-  //       user.sendMessage({
-  //         type: "next-word",
-  //       });
-  //       return;
-  //     }
-  //     if (key === "Backspace") {
-  //       if (currentLetterIndex === currentWord.length) {
-  //         user.sendMessage({
-  //           type: "remove-letter",
-  //         });
-  //         return;
-  //       }
-  //       user.sendMessage({
-  //         type: "remove-extra-letter",
-  //       });
-  //       return;
-  //     }
-  //     user.sendMessage({
-  //       type: "extra-letter",
-  //     });
-  //     return;
-  //   }
-  //   console.log("currentLetter", currentLetter);
-
-  //   if (key === " ") {
-  //     user.sendMessage({
-  //       type: "wrong-letter",
-  //     });
-  //     return;
-  //   }
-  //   if (key === "Backspace") {
-  //     if (currentLetterIndex === 0 && currentWordIndex === 0) {
-  //       return;
-  //     }
-  //     if (currentLetterIndex === 0) {
-  //       user.sendMessage({
-  //         type: "previous-word",
-  //       });
-  //       return;
-  //     }
-  //     user.sendMessage({
-  //       type: "remove-letter",
-  //     });
-  //     return;
-  //   }
-  //   if (currentLetter === key) {
-  //     user.sendMessage({
-  //       type: "correct-letter",
-  //     });
-  //     return;
-  //   }
-  //   user.sendMessage({
-  //     type: "wrong-letter",
-  //   });
-  //   return;
-  // }
+  updateUserStatus(roomId: string, userId: string) {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      return;
+    }
+    const user = room.users.find((u) => u.id === userId);
+    if (!user) return;
+    if (!room.startTime || !room.endTime) return;
+    if (room.progress !== gameProgress.finished && Date.now() >= room.endTime) {
+      room.progress = gameProgress.finished;
+      this.announceResult(roomId);
+      return;
+    }
+    user.status = "finished";
+  }
 
   createRoom(user: User) {
     const roomId = generateRoomId();
