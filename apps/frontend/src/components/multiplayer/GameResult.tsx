@@ -7,11 +7,13 @@ function GameResult({
   contestResult,
   totalTime,
   difficulty,
+  wsConnection,
 }: {
   words: string[];
   contestResult: MultiplayerResult[];
   totalTime: number;
   difficulty: wordDifficulty;
+  wsConnection: WebSocket;
 }) {
   const [selected, setSelected] = useState(0);
   return (
@@ -43,6 +45,7 @@ function GameResult({
         typingState={contestResult[selected].typingState}
         totalTime={totalTime}
         difficulty={difficulty}
+        wsConnection={wsConnection}
       />
     </div>
   );

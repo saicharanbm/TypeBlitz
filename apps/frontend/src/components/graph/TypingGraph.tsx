@@ -10,7 +10,7 @@ import {
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { TypingState, wordDifficulty } from "../../types";
 import { processTypingData } from "../../utils";
-import { Rewind, RotateCw } from "lucide-react";
+import { Home, Rewind, RotateCw } from "lucide-react";
 import { useState } from "react";
 import Replay from "../Replay";
 import CustomErrorDot from "./CustomErrorDot";
@@ -21,12 +21,14 @@ const TypingGraph = ({
   totalTime,
   difficulty,
   initializeGame,
+  wsConnection,
 }: {
   words: string[];
   typingState: TypingState;
   totalTime: number;
   difficulty: wordDifficulty;
   initializeGame?: () => void;
+  wsConnection?: WebSocket;
 }) => {
   const [showReplay, setShowReplay] = useState(false);
   const typingData = processTypingData(typingState, totalTime);
@@ -160,12 +162,21 @@ const TypingGraph = ({
           </div>
         </div>
         <div className="w-full  md:p-6  flex items-center justify-center gap-4">
-          <RotateCw
-            className="text-textSecondary cursor-pointer hover:text-textPrimary transition-colors duration-[150ms]"
-            onClick={initializeGame}
-            size={28}
-            strokeWidth={3}
-          />
+          {wsConnection ? (
+            <Home
+              className="text-textSecondary cursor-pointer hover:text-textPrimary transition-colors duration-[150ms]"
+              onClick={() => wsConnection.close()}
+              size={28}
+              strokeWidth={3}
+            />
+          ) : (
+            <RotateCw
+              className="text-textSecondary cursor-pointer hover:text-textPrimary transition-colors duration-[150ms]"
+              onClick={initializeGame}
+              size={28}
+              strokeWidth={3}
+            />
+          )}
           <Rewind
             className="text-textSecondary cursor-pointer hover:text-textPrimary transition-colors duration-[150ms]"
             onClick={() => setShowReplay((prev) => !prev)}

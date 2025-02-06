@@ -54,19 +54,28 @@ function Replay({
 
   useEffect(() => {
     initializePlayer();
+    playerPosition.current = 0;
+    if (playerTimer.current) clearTimeout(playerTimer.current);
+    clearInterval(typeTimer.current);
+    SetTimerCount(0);
+    setWPM(0);
+    setPlayerState(PlayerState.idle);
   }, [initializePlayer]);
 
   const runTimer = () => {
     typeTimer.current = setInterval(() => {
-      if (timerCount >= totalTime) {
-        clearInterval(typeTimer.current);
-        return; // Exit after clearing the interval
-      }
+      SetTimerCount((prev) => {
+        if (prev >= totalTime) {
+          clearInterval(typeTimer.current);
+          return prev; // Ensure the final value is returned
+        }
 
-      if (graphData[timerCount]) {
-        setWPM(graphData[timerCount].correctWPM);
-      }
-      SetTimerCount((prev) => prev + 1);
+        if (graphData[prev]) {
+          setWPM(graphData[prev].correctWPM);
+        }
+
+        return prev + 1; // Increment timerCount
+      });
     }, 1000);
   };
 
@@ -242,23 +251,23 @@ function Replay({
             <Play
               className="text-textSecondary cursor-pointer hover:text-textPrimary transition-colors duration-[150ms]"
               onClick={startReplay}
-              size={25}
-              strokeWidth={3}
+              size={21}
+              strokeWidth={2}
             />
           ) : (
             <Pause
               className="text-textSecondary cursor-pointer hover:text-textPrimary transition-colors duration-[150ms]"
               onClick={stopReplay}
-              size={25}
-              strokeWidth={3}
+              size={21}
+              strokeWidth={2}
             />
           )}
 
           <RotateCcw
             className="text-textSecondary cursor-pointer hover:text-textPrimary transition-colors duration-[150ms]"
             onClick={restartPlayer}
-            size={25}
-            strokeWidth={3}
+            size={21}
+            strokeWidth={2}
           />
           <p className="text-primaryColor font-robotoMono">{wpm}wpm</p>
           <p className="text-primaryColor font-robotoMono">{timerCount}</p>

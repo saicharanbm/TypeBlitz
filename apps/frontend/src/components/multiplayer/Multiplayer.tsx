@@ -259,17 +259,17 @@ function Multiplayer() {
     contestResult.length > 0 &&
     roomDetails &&
     START_TIME.current &&
-    END_TIME.current
+    END_TIME.current &&
+    wsConnection.current
   ) {
     return (
-      <div>
-        <GameResult
-          words={gameData.originalWords}
-          contestResult={contestResult}
-          totalTime={roomDetails?.time || 60}
-          difficulty={roomDetails?.difficulty}
-        />
-      </div>
+      <GameResult
+        words={gameData.originalWords}
+        contestResult={contestResult}
+        totalTime={roomDetails?.time || 60}
+        difficulty={roomDetails?.difficulty}
+        wsConnection={wsConnection.current}
+      />
     );
   }
   if (gameData && wsConnection.current) {
