@@ -26,6 +26,9 @@ export class RoomManager {
         users: data.users.filter((u) => u.id !== userId),
       });
     }
+    if (this.rooms.get(roomId)?.users.length === 0) {
+      this.deleteRoom(roomId, userId);
+    }
   }
 
   verifyIfRoomExist(roomId: string): boolean {
@@ -68,6 +71,13 @@ export class RoomManager {
   addUserToRoom(roomId: string, user: User, userName: string) {
     const data = this.rooms.get(roomId);
     if (!data || Object.keys(data).length === 0) return;
+    if (data.progress !== gameProgress.waiting) {
+      user.sendMessage({
+        type: "game-started",
+        payload: { message: "The game has already started." },
+      });
+      return;
+    }
     const users = data?.users;
     let name = userName;
     console.log(name);
@@ -207,6 +217,18 @@ export class RoomManager {
       user.typingState.letterDetails.push(event);
       if (isCorrect) {
         user.typingState.correctLetterCount++;
+        //broadcast correct letter count to all the users.
+        const usersCorrectLetterCount = room.users.map((user) => {
+          return {
+            userId: user.id,
+            name: user.displayName,
+            correctLetterCount: user.typingState.correctLetterCount,
+          };
+        });
+        this.broadcastMessage(roomId, {
+          type: "correct-letter-count",
+          payload: { usersCorrectLetterCount },
+        });
       } else {
         user.typingState.errorCount++;
       }

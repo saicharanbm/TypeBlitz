@@ -140,3 +140,9 @@ export type MultiplayerResult = {
   name: string;
   typingState: TypingState;
 };
+
+export type UsersCorrectLetterCount = {
+  userId: string;
+  name: string;
+  correctLetterCount: number;
+}[];

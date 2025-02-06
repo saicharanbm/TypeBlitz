@@ -62,10 +62,6 @@ export class User {
             name
           );
           if (!response) {
-            this.sendMessage({
-              type: "invalid-request",
-              payload: { message: "Please provide all the details." },
-            });
             return;
           }
           this.id = userId;
@@ -258,6 +254,7 @@ export class User {
       this.ws.close();
       return;
     }
+    RoomManagerInstance.removeUserFromRoom(this.roomId, this.id);
     RoomManagerInstance.broadcastMessage(
       this.roomId!,
       {
@@ -269,7 +266,6 @@ export class User {
       },
       this.id
     );
-    RoomManagerInstance.removeUserFromRoom(this.roomId, this.id);
 
     //close the websocket
     this.ws.close();

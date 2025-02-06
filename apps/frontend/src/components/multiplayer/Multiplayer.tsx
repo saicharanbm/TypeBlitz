@@ -5,6 +5,7 @@ import {
   letterType,
   MultiplayerResult,
   roomDetailsType,
+  UsersCorrectLetterCount,
   wsStatus,
 } from "../../types";
 import { v4 as uuid } from "uuid";
@@ -22,6 +23,7 @@ import Room from "./Room";
 import ConnectionError from "./ConnectionError";
 import GameArea from "./GameArea";
 import GameResult from "./GameResult";
+import GameProgress from "./GameProgress";
 
 function Multiplayer() {
   const [connectionStatus, setConnectionStatus] = useState<wsStatus>(
@@ -36,6 +38,8 @@ function Multiplayer() {
   const END_TIME = useRef<number>();
   const [contestResult, setContestResult] = useState<MultiplayerResult[]>();
   const userId = useRef(uuid());
+  const [usersCorrectLetterList, setUsersCorrectLetterList] =
+    useState<UsersCorrectLetterCount>();
 
   const connectWebSocket = () => {
     wsConnection.current = new WebSocket("ws://localhost:3001/");
@@ -68,6 +72,8 @@ function Multiplayer() {
           case "user-left": {
             const { userId, name } = data.payload;
             deleteUser(userId, name, setRoomDetails);
+            console.log(name, "left the room");
+            showToastError(`${name} left the room`);
             break;
           }
           case "message":
@@ -80,13 +86,13 @@ function Multiplayer() {
             );
             break;
 
-          case "invalid-request": {
+          case "invalid-request":
+          case "game-started": {
             const { message } = data.payload;
-
-            showToastError(message || "Plesae provide all the details.");
+            console.log("message :", message);
+            showToastError(message);
             break;
           }
-
           case "user-already-in-the-room":
             showToastError("User has already joined the room.");
             break;
@@ -175,6 +181,11 @@ function Multiplayer() {
 
             break;
           }
+          case "correct-letter-count": {
+            const { usersCorrectLetterCount } = data.payload;
+            setUsersCorrectLetterList(usersCorrectLetterCount);
+            break;
+          }
 
           default:
             console.warn("Unknown message type:", data.type);
@@ -195,6 +206,8 @@ function Multiplayer() {
         setConnectionStatus(wsStatus.error);
       setRoomDetails(undefined);
       setGameData(undefined);
+      setContestResult(undefined);
+      setUsersCorrectLetterList(undefined);
       userId.current = uuid();
       connectWebSocket();
 
@@ -274,12 +287,17 @@ function Multiplayer() {
   }
   if (gameData && wsConnection.current) {
     return (
-      <GameArea
-        gameState={gameData}
-        setGameState={setGameData}
-        wsConnection={wsConnection.current}
-        totalTime={roomDetails?.time || 60}
-      />
+      <div className="w-full flex flex-col gap-5">
+        <GameArea
+          gameState={gameData}
+          setGameState={setGameData}
+          wsConnection={wsConnection.current}
+          totalTime={roomDetails?.time || 60}
+        />
+        {usersCorrectLetterList && (
+          <GameProgress usersCorrectLetterList={usersCorrectLetterList} />
+        )}
+      </div>
     );
   }
 

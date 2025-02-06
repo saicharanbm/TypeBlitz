@@ -23,14 +23,11 @@ export const processTypingData = (
   typingState: TypingState,
   totalDuration: number
 ) => {
-  console.log(JSON.stringify(typingState, null, 2));
-  console.log(totalDuration);
   if (
     !typingState.startTimestamp ||
     !typingState.endTimestamp ||
     totalDuration <= 0
   ) {
-    console.log("Invalid input data:", { typingState, totalDuration });
     return;
   }
 
@@ -48,12 +45,6 @@ export const processTypingData = (
       rawWPM: 0,
     })),
   };
-
-  // Log input data in a more readable way
-  console.log(
-    "Input typing state:",
-    JSON.stringify(typingState.letterDetails, null, 2)
-  );
 
   typingState.letterDetails.forEach((data) => {
     const currentTime = Math.ceil(data.timestamp / 1000);
@@ -79,9 +70,6 @@ export const processTypingData = (
 
     previousCount += element.correctCount;
   });
-
-  // Log final result in a more readable way
-  console.log("Processed result:", JSON.stringify(result, null, 2));
 
   return result;
 };
@@ -119,7 +107,6 @@ export const getRandomWord = (wordType: wordDifficulty): string => {
   return words[randomIndex];
 };
 export const isUserAdmin = (userId: string, users: Users[]) => {
-  console.log(userId, users);
   const adminUser = users.find((user) => user.isAdmin);
   return adminUser ? adminUser.userId === userId : false;
 };
@@ -141,7 +128,6 @@ export const handleFirstUser = (
     !time ||
     typeof isAdmin !== "boolean"
   ) {
-    console.log("error");
     showToastError("Something went wrong while creating the room.");
     return;
   }
@@ -164,7 +150,6 @@ export const updateUsers = (
   >
 ) => {
   const { name, userId, isAdmin } = payload;
-  console.log(payload);
   if (!name || !userId || typeof isAdmin !== "boolean") {
     showToastError("Something went wrong while adding users.");
     return;
