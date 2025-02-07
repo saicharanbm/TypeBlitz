@@ -295,7 +295,10 @@ function Multiplayer() {
           totalTime={roomDetails?.time || 60}
         />
         {usersCorrectLetterList && (
-          <GameProgress usersCorrectLetterList={usersCorrectLetterList} />
+          <GameProgress
+            usersCorrectLetterList={usersCorrectLetterList}
+            userId={userId.current}
+          />
         )}
       </div>
     );

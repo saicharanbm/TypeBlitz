@@ -38,7 +38,7 @@ const TypingGraph = ({
       <div className="w-full  flex flex-col">
         <div className="w-full h-96 p-4 flex ">
           <div className=" pr-4 pt-7 flex flex-col gap-5">
-            <div className="text-center">
+            <div className="text-center cursor-pointer">
               <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-textSecondary">
                 wpm
               </h3>
@@ -49,7 +49,7 @@ const TypingGraph = ({
                 <p>{typingData.totalWPM.toFixed(2)} wpm</p>
               </ReactTooltip>
             </div>
-            <div className="text-center">
+            <div className="text-center cursor-pointer">
               <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-textSecondary">
                 acc
               </h3>
@@ -146,17 +146,24 @@ const TypingGraph = ({
             </ResponsiveContainer>
 
             <div className="w-full h-auto flex justify-around ">
-              <div className="text-center">
+              <div className="text-center cursor-pointer">
                 <h3>characters</h3>
-                <h1 className="md:text-3xl text-primaryColor">{`${typingState.correctLetterCount + typingState.errorCount}/${typingState.correctLetterCount}/${typingState.errorCount}`}</h1>
+                <h1 className="characters md:text-3xl text-primaryColor">{`${typingState.correctLetterCount + typingState.errorCount}/${typingState.correctLetterCount}/${typingState.errorCount}`}</h1>
+                <ReactTooltip anchorSelect=".characters" place="top">
+                  <p>total</p>
+                  <p>correct</p>
+                  <p>error </p>
+                </ReactTooltip>
               </div>
-              <div className="text-center">
+              <div className="text-center cursor-pointer">
                 <h3>type</h3>
-                <h1 className="md:text-3xl text-primaryColor">{difficulty}</h1>
+                <h1 className="difficulty md:text-3xl text-primaryColor">
+                  {difficulty}
+                </h1>
               </div>
-              <div className="text-center">
+              <div className="text-center cursor-pointer">
                 <h3>time</h3>
-                <h1 className="md:text-3xl text-primaryColor">{totalTime}</h1>
+                <h1 className="md:text-3xl text-primaryColor">{totalTime}s</h1>
               </div>
             </div>
           </div>

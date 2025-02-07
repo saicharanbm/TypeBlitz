@@ -118,6 +118,9 @@ function TextArea({
         role="textbox"
         aria-label="Typing area"
         onKeyDown={(event) => {
+          if (event.key === " ") {
+            event.preventDefault(); // Prevent scrolling
+          }
           if (wsConnection && gameState.gameStatus !== "playing") {
             return;
           }
