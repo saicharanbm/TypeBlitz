@@ -46,12 +46,12 @@ function GameResult({
   return (
     <div>
       {isWinner ? (
-        <div className="text-green-500 font-bold py-6 text-center">
+        <div className="text-primaryColor font-bold py-6 text-center">
           🎉 Congratulations, you won! 🎉
         </div>
       ) : (
-        <div className="text-red-500 font-bold py-6 text-center">
-          Better luck next time!
+        <div className="text-textSecondary font-bold py-6 text-center">
+          Better luck next time!{` ${topScorer.name} won the game.`}
         </div>
       )}
 
