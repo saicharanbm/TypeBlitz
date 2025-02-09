@@ -42,7 +42,7 @@ function Multiplayer() {
     useState<UsersCorrectLetterCount>();
 
   const connectWebSocket = () => {
-    wsConnection.current = new WebSocket("ws://localhost:3001/");
+    wsConnection.current = new WebSocket("http://localhost:3001");
     const ws = wsConnection.current;
 
     ws.onopen = () => {
@@ -282,6 +282,7 @@ function Multiplayer() {
         totalTime={roomDetails?.time || 60}
         difficulty={roomDetails?.difficulty}
         wsConnection={wsConnection.current}
+        userId={userId.current}
       />
     );
   }

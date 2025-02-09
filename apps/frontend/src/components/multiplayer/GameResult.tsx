@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MultiplayerResult, wordDifficulty } from "../../types";
 import TypingGraph from "../graph/TypingGraph";
 
@@ -8,41 +8,61 @@ function GameResult({
   totalTime,
   difficulty,
   wsConnection,
+  userId,
 }: {
   words: string[];
   contestResult: MultiplayerResult[];
   totalTime: number;
   difficulty: wordDifficulty;
   wsConnection: WebSocket;
+  userId: string;
 }) {
-  const [selected, setSelected] = useState(0);
+  // Find the index of the userId in the contestResult array
+  const initialSelectedIndex = contestResult.findIndex(
+    (user) => user.userId === userId
+  );
+
+  const [selected, setSelected] = useState(
+    initialSelectedIndex !== -1 ? initialSelectedIndex : 0
+  );
+
+  // If contestResult updates, re-check the userId index
+  useEffect(() => {
+    const newIndex = contestResult.findIndex((user) => user.userId === userId);
+    if (newIndex !== -1) {
+      setSelected(newIndex);
+    }
+  }, [contestResult, userId]);
+
   return (
     <div>
-      <label htmlFor="options">Choose a user :</label>
-      <select
-        id="options"
-        name="options"
-        className="w-28 bg-transparent border-2 border-nav rounded-lg"
-        onChange={(e) => {
-          setSelected(parseInt(e.target.value));
-        }}
-      >
-        {contestResult.map((result, id) => {
-          return (
-            <option key={result.userId} value={id}>
+      <div className="flex items-center gap-3">
+        <label
+          htmlFor="options"
+          className="block md:text-xl lg:text-2xl font-medium text-textPrimary"
+        >
+          Choose a user:
+        </label>
+        <select
+          id="options"
+          name="options"
+          className="w-40 px-4 py-2 mt-1 bg-transparent text-white border-2 border-gray-500 rounded-md focus:outline-none   focus:border-primaryColor transition"
+          onChange={(e) => {
+            setSelected(parseInt(e.target.value));
+          }}
+          value={selected} // Ensure the selected value is updated
+        >
+          {contestResult.map((result, id) => (
+            <option key={result.userId} value={id} className="text-black">
               {result.name}
             </option>
-          );
-        })}
-      </select>
+          ))}
+        </select>
+      </div>
 
-      {/* <div>{JSON.stringify(contestResult, null, 2)}</div> */}
-      {/* <div>{contestResult[selected].name}</div>
-      <div>{contestResult[selected].correctLetterCount}</div>
-      <div>{contestResult[selected].errorCount}</div> */}
       <TypingGraph
         words={words}
-        typingState={contestResult[selected].typingState}
+        typingState={contestResult[selected]?.typingState}
         totalTime={totalTime}
         difficulty={difficulty}
         wsConnection={wsConnection}
