@@ -3,16 +3,14 @@ function Footer() {
   return (
     <div className="w-full flex gap-2 md:gap-4 lg:gap-6 p-4 pt-8 justify-center text-textSecondary text-lg font-normal select-none">
       <a
-        href="https://google.com"
-        target="_blank"
-        rel="noopener noreferrer"
+        href="mailto:saicharanbm.dev@gmail.com"
         className="flex gap-1  hover:text-textPrimary transition-colors duration-[150ms]"
       >
         <Mail />
         <p>Contact</p>
       </a>
       <a
-        href="https://google.com"
+        href="https://github.com/saicharanbm"
         target="_blank"
         rel="noopener noreferrer"
         className="flex  gap-1  hover:text-textPrimary transition-colors duration-[150ms]"
@@ -21,7 +19,7 @@ function Footer() {
         <p>Github</p>
       </a>
       <a
-        href="https://google.com"
+        href="https://x.com/saicharanbm"
         target="_blank"
         rel="noopener noreferrer"
         className="flex  gap-1  hover:text-textPrimary transition-colors duration-[150ms]"
@@ -30,7 +28,7 @@ function Footer() {
         <p>Twitter</p>
       </a>
       <a
-        href="https://google.com"
+        href="https://www.linkedin.com/in/sai-charan-b-m-95aa83190/"
         target="_blank"
         rel="noopener noreferrer"
         className="flex  gap-1  hover:text-textPrimary transition-colors duration-[150ms]"

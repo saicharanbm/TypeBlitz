@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="90" fill="#2D3748" />
+  
+  <!-- Letters T and B -->
+  <text x="54" y="130" font-family="Arial, sans-serif" font-weight="bold" font-size="100" fill="#E2E8F0">T</text>
+  <text x="104" y="130" font-family="Arial, sans-serif" font-weight="bold" font-size="100" fill="#FCD34D">B</text>
+
+</svg>
