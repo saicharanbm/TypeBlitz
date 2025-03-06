@@ -5,7 +5,13 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "websocket:build": "cd apps/ws_server && pnpm run build && cd ../..",
+    "websocket:start": "cd apps/ws_server && pnpm run start",
+    "websocket:dev": "cd apps/ws_server && pnpm run dev",
+    "web:build": "cd apps/web && pnpm run build && cd ../..",
+    "web:start": "cd apps/web && pnpm run start",
+    "web:dev": "cd apps/web && pnpm run dev"
   },
   "devDependencies": {
     "prettier": "^3.2.5",

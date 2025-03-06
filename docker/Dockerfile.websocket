@@ -1,0 +1,46 @@
+# Use Node.js 20 Alpine image
+FROM node:20-alpine
+
+# Install pnpm globally
+RUN npm i -g pnpm
+
+
+# Set working directory
+WORKDIR /usr/src/app
+
+# Copy workspace files first for better caching
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json turbo.json ./
+
+# Copy only necessary packages
+
+COPY ./apps/ws_server/package.json ./apps/ws_server/package.json
+
+# Install dependencies efficiently
+RUN pnpm install --frozen-lockfile
+
+# Copy the actual project files
+
+COPY ./apps/ws_server ./apps/ws_server
+
+
+# Build the API
+RUN pnpm run websocket:build
+
+# Expose the API port
+EXPOSE 3001
+
+# Define the entrypoint script
+
+CMD ["pnpm", "run", "websocket:start"]
+
+# since docker file is inside docker folder, we need to run docker build command from root directory
+#  using docker build -t typeblitz-websocket -f docker/Dockerfile.websocket .
+
+# To connect to the PostgreSQL database running on your host machine from within a Docker container, you need to use a special hostname:
+
+# On Mac: Use host.docker.internal
+# On Windows: Use host.docker.internal
+# On Linux: Use the host's IP address (typically 172.17.0.1 or your machine's local IP)
+
+
+#  docker run -p 3001:3001 typeblitz-websocket
