@@ -1,0 +1,51 @@
+# Use Node.js 20 Alpine image
+FROM node:20-alpine AS build 
+
+# Install pnpm globally
+RUN npm i -g pnpm
+
+
+# Set working directory
+WORKDIR /usr/src/app
+
+# Copy workspace files first for better caching
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json turbo.json ./
+
+# Copy only necessary packages
+
+COPY ./apps/frontend/package.json ./apps/frontend/package.json
+
+# Install dependencies efficiently
+RUN pnpm install --frozen-lockfile
+
+# Copy the actual project files
+
+COPY ./apps/frontend ./apps/frontend
+
+
+# Build the API
+RUN pnpm run frontend:build
+
+# Use Nginx to serve the built files
+FROM nginx:alpine
+
+# Copy built files from the previous stage
+COPY --from=build /usr/src/app/apps/frontend/dist /usr/share/nginx/html
+
+# Expose port 80
+EXPOSE 80
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
+
+# since docker file is inside docker folder, we need to run docker build command from root directory
+#  using docker build -t typeblitz-frontend -f docker/Dockerfile.frontend .
+
+# To connect to the PostgreSQL database running on your host machine from within a Docker container, you need to use a special hostname:
+
+# On Mac: Use host.docker.internal
+# On Windows: Use host.docker.internal
+# On Linux: Use the host's IP address (typically 172.17.0.1 or your machine's local IP)
+
+
+#  docker run -p 3000:80 typeblitz-frontend
