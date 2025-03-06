@@ -1,0 +1,30 @@
+services:
+  websocket_server:
+    container_name: typeBlitz-websocket-server
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.websocket
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+
+  frontend:
+    container_name: typeBlitz-frontend
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.frontend
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    depends_on:
+      - websocket_server
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - frontend_build:/usr/share/nginx/html
+
+volumes:
+  frontend_build:
