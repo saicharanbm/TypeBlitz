@@ -6,6 +6,7 @@ import App from "./App.tsx";
 import GameArea from "./components/GameArea.tsx";
 import Multiplayer from "./components/multiplayer/Multiplayer.tsx";
 import { ToastContainer, Zoom } from "react-toastify";
+import PageNotFound from "./components/PageNotFound.tsx";
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
         element: <Multiplayer />,
       },
     ],
+  },
+  {
+    path: "/*",
+    element: <PageNotFound />,
   },
 ]);
 
