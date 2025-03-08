@@ -124,11 +124,13 @@ function GameArea() {
           setTypingState={setTypingState}
           typingState={typingState}
         />
-        <div
-          className="w-full p-7 md:p-12  flex items-center justify-center text-textSecondary cursor-pointer hover:text-textPrimary transition-colors duration-[150ms] "
-          onClick={initializeGame}
-        >
-          <RotateCw size={28} strokeWidth={3} />
+        <div className="w-full p-7 md:p-12  flex items-center justify-center ">
+          <RotateCw
+            className="text-textSecondary cursor-pointer hover:text-textPrimary transition-colors duration-[150ms] "
+            size={28}
+            strokeWidth={3}
+            onClick={initializeGame}
+          />
         </div>
       </div>
     );
